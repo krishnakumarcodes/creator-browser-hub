@@ -14,6 +14,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalFocusManager
@@ -43,101 +44,128 @@ fun BrowserTopBar(
     val iconTint = if (isDarkMode) Color.White else Color(0xFF3C4043)
     val desktopBadgeColor = Color(0xFF6C5CE7)
 
-    Row(
+    // रंग-बिरंगे लोडिंग ग्रेडिएंट कलर्स
+    val rainbowBrush = Brush.horizontalGradient(
+        listOf(
+            Color(0xFF8B5CF6), // Violet
+            Color(0xFF06B6D4), // Cyan
+            Color(0xFFF43F5E), // Rose
+            Color(0xFFF59E0B)  // Amber
+        )
+    )
+
+    Column(
         modifier = modifier
             .fillMaxWidth()
             .background(barBackgroundColor)
             .statusBarsPadding()
-            .padding(horizontal = 12.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        // Desktop / Mobile टॉगल बैज
-        Surface(
-            shape = RoundedCornerShape(14.dp),
-            color = if (tab.isDesktopMode) desktopBadgeColor else DarkSurfaceElevated,
+        Row(
             modifier = Modifier
-                .height(38.dp)
-                .clickable { viewModel.toggleDesktopMode() }
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Box(
+            // Desktop / Mobile टॉगल बैज
+            Surface(
+                shape = RoundedCornerShape(14.dp),
+                color = if (tab.isDesktopMode) desktopBadgeColor else DarkSurfaceElevated,
                 modifier = Modifier
-                    .fillMaxHeight()
-                    .padding(horizontal = 12.dp),
-                contentAlignment = Alignment.Center
+                    .height(38.dp)
+                    .clickable { viewModel.toggleDesktopMode() }
             ) {
-                Text(
-                    text = if (tab.isDesktopMode) "DESKTOP" else "MOBILE",
-                    color = Color.White,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .padding(horizontal = 12.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = if (tab.isDesktopMode) "DESKTOP" else "MOBILE",
+                        color = Color.White,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
-        }
 
-        // टाइपिंग वाला सर्च बार (Search or enter Creator URL...)
-        Surface(
-            shape = RoundedCornerShape(16.dp),
-            color = searchBoxBackground,
-            modifier = Modifier
-                .weight(1f)
-                .height(40.dp)
-        ) {
-            Row(
+            // टाइपिंग वाला सर्च बार (Search or enter Creator URL...)
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = searchBoxBackground,
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .weight(1f)
+                    .height(40.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Search",
+                        tint = hintTextColor,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    BasicTextField(
+                        value = inputText,
+                        onValueChange = { inputText = it },
+                        singleLine = true,
+                        textStyle = TextStyle(
+                            color = primaryTextColor,
+                            fontSize = 13.sp
+                        ),
+                        cursorBrush = SolidColor(CreatorVioletLight),
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
+                        keyboardActions = KeyboardActions(onGo = {
+                            if (inputText.isNotBlank()) {
+                                viewModel.loadUrl(inputText.trim())
+                                focusManager.clearFocus()
+                            }
+                        }),
+                        modifier = Modifier.weight(1f),
+                        decorationBox = { innerTextField ->
+                            if (inputText.isEmpty()) {
+                                Text(
+                                    text = "Search or enter Creator URL...",
+                                    color = hintTextColor,
+                                    fontSize = 13.sp,
+                                    maxLines = 1
+                                )
+                            }
+                            innerTextField()
+                        }
+                    )
+                }
+            }
+
+            // रीफ्रेश बटन
+            IconButton(
+                onClick = { viewModel.reload() },
+                modifier = Modifier.size(40.dp)
             ) {
                 Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "Search",
-                    tint = hintTextColor,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                BasicTextField(
-                    value = inputText,
-                    onValueChange = { inputText = it },
-                    singleLine = true,
-                    textStyle = TextStyle(
-                        color = primaryTextColor,
-                        fontSize = 13.sp
-                    ),
-                    cursorBrush = SolidColor(CreatorVioletLight),
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
-                    keyboardActions = KeyboardActions(onGo = {
-                        if (inputText.isNotBlank()) {
-                            viewModel.loadUrl(inputText.trim())
-                            focusManager.clearFocus()
-                        }
-                    }),
-                    modifier = Modifier.weight(1f),
-                    decorationBox = { innerTextField ->
-                        if (inputText.isEmpty()) {
-                            Text(
-                                text = "Search or enter Creator URL...",
-                                color = hintTextColor,
-                                fontSize = 13.sp,
-                                maxLines = 1
-                            )
-                        }
-                        innerTextField()
-                    }
+                    imageVector = Icons.Default.Refresh,
+                    contentDescription = "Refresh",
+                    tint = iconTint
                 )
             }
         }
 
-        // रीफ्रेश बटन
-        IconButton(
-            onClick = { viewModel.reload() },
-            modifier = Modifier.size(40.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Refresh,
-                contentDescription = "Refresh",
-                tint = iconTint
+        // 🌈 लोड होते वक्त रंग-बिरंगा प्रोग्रेस बार
+        if (tab.isLoading && tab.progress < 100) {
+            val progressFraction = (tab.progress.coerceIn(10, 100)) / 100f
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(progressFraction)
+                    .height(3.dp)
+                    .background(rainbowBrush)
             )
         }
     }
 }
+
