@@ -64,14 +64,12 @@ class BrowserRepository(
         browserDao.deleteNote(note)
     }
 
-    // Local Storage & Sandboxing security info
     suspend fun getLocalSecurityMetrics(): LocalSecurityMetrics = withContext(Dispatchers.IO) {
         val cacheSize = getDirSize(context.cacheDir) + getDirSize(context.codeCacheDir)
         val dataDir = context.filesDir.parentFile
         val totalAppDataSize = if (dataDir != null) getDirSize(dataDir) else cacheSize
         val cookieManager = CookieManager.getInstance()
         val hasCookies = cookieManager.hasCookies()
-
         LocalSecurityMetrics(
             sandboxPath = context.applicationInfo.dataDir,
             cacheSizeBytes = cacheSize,
@@ -82,15 +80,10 @@ class BrowserRepository(
     }
 
     suspend fun clearBrowserCacheAndCookies() = withContext(Dispatchers.IO) {
-        // Clear cookies
         val cookieManager = CookieManager.getInstance()
         cookieManager.removeAllCookies(null)
         cookieManager.flush()
-
-        // Clear web storage / DOM storage
         WebStorage.getInstance().deleteAllData()
-
-        // Clean cache files
         deleteRecursively(context.cacheDir)
     }
 
@@ -125,11 +118,8 @@ data class LocalSecurityMetrics(
     val cookiesActive: Boolean,
     val isIsolatedSandbox: Boolean
 ) {
-    val formattedCacheSize: String
-        get() = formatBytes(cacheSizeBytes)
-
-    val formattedTotalSize: String
-        get() = formatBytes(totalDataSizeBytes)
+    val formattedCacheSize: String get() = formatBytes(cacheSizeBytes)
+    val formattedTotalSize: String get() = formatBytes(totalDataSizeBytes)
 
     private fun formatBytes(bytes: Long): String {
         return when {
