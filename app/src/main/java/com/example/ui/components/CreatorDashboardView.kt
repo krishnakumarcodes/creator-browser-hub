@@ -3,8 +3,8 @@ package com.example.ui.components
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -251,7 +252,7 @@ fun CreatorDashboardView(
             }
         }
 
-        // 2. FAVORITE WEBSITES (QUICK ACCESS) 4-कॉलम ग्रिड
+        // 2. FAVORITE WEBSITES (QUICK ACCESS) 4-कॉलम ग्रिड (Add पहले, फिर ऐप्स)
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -399,20 +400,29 @@ fun CreatorDashboardView(
             }
         }
 
-        // 4. Primary Studios Cards (सफल Run #13 जैसा बिल्कुल शुद्ध इनलाइन कोड)
+        // 4. Primary Studios Cards
         item {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 primaryShortcuts.forEach { shortcut ->
-                    Card(
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = DarkSurface),
-                        border = BorderStroke(1.dp, DarkBorder),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { viewModel.loadUrl(shortcut.url) }
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(14.dp),
-                   
+                    StudioCard(
+                        shortcut = shortcut,
+                        onClick = { viewModel.loadUrl(shortcut.url) }
+                    )
+                }
+            }
+        }
+
+        // 5. MORE CREATOR PLATFORMS
+        item {
+            Text(
+                text = "MORE CREATOR PLATFORMS",
+                color = TextPrimary,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 0.8.sp
+            )
+        }
+
+        // 6. Grid Tiles (TikTok, X, Canva, Twitch)
+        item {
+       
