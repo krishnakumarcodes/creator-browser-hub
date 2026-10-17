@@ -1,0 +1,6 @@
+{
+  "name": "Creator Browser Hub",
+  "description": "Multi-tab Android browser built for creators with default desktop mode, quick creator shortcuts, session persistence, and local-first security.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
