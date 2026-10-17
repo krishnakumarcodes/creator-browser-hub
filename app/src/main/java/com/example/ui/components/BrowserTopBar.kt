@@ -1,8 +1,12 @@
 package com.example.ui.components
 
+import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -14,9 +18,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -27,15 +33,32 @@ import com.example.data.model.BrowserTab
 import com.example.ui.theme.*
 import com.example.viewmodel.BrowserViewModel
 
+enum class SearchEngine(
+    val displayName: String,
+    val shortCode: String,
+    val brandColor: Color,
+    val searchUrlPrefix: String
+) {
+    GOOGLE("Google", "G", Color(0xFF4285F4), "https://www.google.com/search?q="),
+    BRAVE("Brave Search", "B", Color(0xFFFF5722), "https://search.brave.com/search?q="),
+    DUCKDUCKGO("DuckDuckGo", "D", Color(0xFFDE5833), "https://duckduckgo.com/?q="),
+    STARTPAGE("Startpage", "S", Color(0xFF4B6B94), "https://www.startpage.com/sp/search?query=")
+}
+
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BrowserTopBar(
     tab: BrowserTab,
     viewModel: BrowserViewModel,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     val isDarkMode by viewModel.isDarkMode.collectAsState()
     val focusManager = LocalFocusManager.current
     var inputText by remember(tab.url) { mutableStateOf(if (tab.isHome) "" else tab.url) }
+
+    var selectedEngine by remember { mutableStateOf(SearchEngine.GOOGLE) }
+    var showEngineMenu by remember { mutableStateOf(false) }
 
     val barBackgroundColor = if (isDarkMode) Color(0xFF0F0E17) else Color(0xFFFFFFFF)
     val searchBoxBackground = if (isDarkMode) Color(0xFF1F1D2B) else Color(0xFFF1F3F4)
@@ -90,7 +113,7 @@ fun BrowserTopBar(
                 }
             }
 
-            // टाइपिंग वाला सर्च बार (Search or enter Creator URL...)
+            // सर्च बार (सर्च इंजन बैज + इनपुट टेक्स्ट फ़ील्ड)
             Surface(
                 shape = RoundedCornerShape(16.dp),
                 color = searchBoxBackground,
@@ -101,16 +124,80 @@ fun BrowserTopBar(
                 Row(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(horizontal = 12.dp),
+                        .padding(horizontal = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Search",
-                        tint = hintTextColor,
-                        modifier = Modifier.size(18.dp)
-                    )
+                    // सर्च इंजन बैज (1 टैप = अगला इंजन, लॉन्ग-प्रेस = पूरी लिस्ट मेन्यू)
+                    Box {
+                        Box(
+                            modifier = Modifier
+                                .size(26.dp)
+                                .clip(CircleShape)
+                                .background(selectedEngine.brandColor)
+                                .combinedClickable(
+                                    onClick = {
+                                        val all = SearchEngine.values()
+                                        val nextIndex = (selectedEngine.ordinal + 1) % all.size
+                                        selectedEngine = all[nextIndex]
+                                        Toast.makeText(context, "सुरक्षित इंजन: ${selectedEngine.displayName}", Toast.LENGTH_SHORT).show()
+                                    },
+                                    onLongClick = {
+                                        showEngineMenu = true
+                                    }
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = selectedEngine.shortCode,
+                                color = Color.White,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+
+                        // लॉन्ग-प्रेस पर खुलने वाला सर्च इंजन चयन मेन्यू
+                        DropdownMenu(
+                            expanded = showEngineMenu,
+                            onDismissRequest = { showEngineMenu = false },
+                            modifier = Modifier.background(DarkSurfaceElevated)
+                        ) {
+                            SearchEngine.values().forEach { engine ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            text = engine.displayName,
+                                            color = TextPrimary,
+                                            fontWeight = if (engine == selectedEngine) FontWeight.Bold else FontWeight.Normal
+                                        )
+                                    },
+                                    leadingIcon = {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(20.dp)
+                                                .clip(CircleShape)
+                                                .background(engine.brandColor),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = engine.shortCode,
+                                                color = Color.White,
+                                                fontSize = 10.sp,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                    },
+                                    onClick = {
+                                        selectedEngine = engine
+                                        showEngineMenu = false
+                                        Toast.makeText(context, "सुरक्षित इंजन: ${engine.displayName}", Toast.LENGTH_SHORT).show()
+                                    }
+                                )
+                            }
+                        }
+                    }
+
                     Spacer(modifier = Modifier.width(8.dp))
+
                     BasicTextField(
                         value = inputText,
                         onValueChange = { inputText = it },
@@ -122,8 +209,14 @@ fun BrowserTopBar(
                         cursorBrush = SolidColor(CreatorVioletLight),
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
                         keyboardActions = KeyboardActions(onGo = {
-                            if (inputText.isNotBlank()) {
-                                viewModel.loadUrl(inputText.trim())
+                            val query = inputText.trim()
+                            if (query.isNotBlank()) {
+                                val targetUrl = when {
+                                    query.startsWith("http://") || query.startsWith("https://") -> query
+                                    query.contains(".") && !query.contains(" ") -> "https://$query"
+                                    else -> "${selectedEngine.searchUrlPrefix}$query"
+                                }
+                                viewModel.loadUrl(targetUrl)
                                 focusManager.clearFocus()
                             }
                         }),
@@ -168,4 +261,3 @@ fun BrowserTopBar(
         }
     }
 }
-
