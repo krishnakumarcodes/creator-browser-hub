@@ -90,7 +90,6 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.retrofit)
     implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.analytics)
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
 
@@ -113,4 +112,3 @@ dependencies {
     "ksp"(libs.androidx.room.compiler)
     "ksp"(libs.moshi.kotlin.codegen)
 }
-
