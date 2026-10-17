@@ -3,8 +3,8 @@ package com.example.ui.components
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
@@ -17,7 +17,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -27,6 +26,7 @@ import com.example.data.model.CreatorShortcut
 import com.example.ui.theme.*
 import com.example.viewmodel.BrowserViewModel
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CreatorDashboardView(
     viewModel: BrowserViewModel,
@@ -251,7 +251,7 @@ fun CreatorDashboardView(
             }
         }
 
-        // 2. FAVORITE WEBSITES (QUICK ACCESS) 4-कॉलम ग्रिड (Add पहले, फिर ऐप्स)
+        // 2. FAVORITE WEBSITES (QUICK ACCESS) 4-कॉलम ग्रिड
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -271,18 +271,18 @@ fun CreatorDashboardView(
                         letterSpacing = 0.8.sp
                     )
 
-                    val totalItems = 1 + customShortcuts.size
-                    val totalRows = (totalItems + 3) / 4
+                    val totalCount = 1 + customShortcuts.size
+                    val rowCount = (totalCount + 3) / 4
 
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        for (r in 0 until totalRows) {
+                        for (rowIndex in 0 until rowCount) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceAround
                             ) {
-                                for (c in 0 until 4) {
-                                    val idx = r * 4 + c
-                                    if (idx == 0) {
+                                for (colIndex in 0 until 4) {
+                                    val itemIndex = rowIndex * 4 + colIndex
+                                    if (itemIndex == 0) {
                                         Column(
                                             horizontalAlignment = Alignment.CenterHorizontally,
                                             verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -315,18 +315,50 @@ fun CreatorDashboardView(
                                                 textAlign = TextAlign.Center
                                             )
                                         }
-                                    } else if (idx <= customShortcuts.size) {
-                                        val item = customShortcuts[idx - 1]
-                                        QuickAccessTile(
-                                            shortcut = item,
-                                            onClick = { viewModel.loadUrl(item.url) },
-                                            onLongClick = {
-                                                if (item.isCustom) {
-                                                    customShortcuts = customShortcuts.filter { it.id != item.id }
-                                                    viewModel.showMessage("${item.name} removed")
+                                    } else if (itemIndex <= customShortcuts.size) {
+                                        val shortcut = customShortcuts[itemIndex - 1]
+                                        Column(
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            verticalArrangement = Arrangement.spacedBy(6.dp),
+                                            modifier = Modifier
+                                                .width(68.dp)
+                                                .clip(RoundedCornerShape(12.dp))
+                                                .combinedClickable(
+                                                    onClick = { viewModel.loadUrl(shortcut.url) },
+                                                    onLongClick = {
+                                                        if (shortcut.isCustom) {
+                                                            customShortcuts = customShortcuts.filter { it.id != shortcut.id }
+                                                            viewModel.showMessage("${shortcut.name} removed")
+                                                        }
+                                                    }
+                                                )
+                                                .padding(vertical = 4.dp)
+                                        ) {
+                                            Surface(
+                                                shape = CircleShape,
+                                                color = DarkSurfaceElevated,
+                                                border = BorderStroke(1.dp, shortcut.brandColor),
+                                                modifier = Modifier.size(50.dp)
+                                            ) {
+                                                Box(contentAlignment = Alignment.Center) {
+                                                    Text(
+                                                        text = shortcut.name.take(1).uppercase(),
+                                                        color = Color.White,
+                                                        fontWeight = FontWeight.Black,
+                                                        fontSize = 18.sp
+                                                    )
                                                 }
                                             }
-                                        )
+                                            Text(
+                                                text = shortcut.name,
+                                                color = TextPrimary,
+                                                fontWeight = FontWeight.Medium,
+                                                fontSize = 11.sp,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis,
+                                                textAlign = TextAlign.Center
+                                            )
+                                        }
                                     } else {
                                         Spacer(modifier = Modifier.width(68.dp))
                                     }
@@ -338,7 +370,7 @@ fun CreatorDashboardView(
             }
         }
 
-        // 3. PRIMARY CREATOR STUDIOS Header
+        // 3. PRIMARY CREATOR STUDIOS
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -367,89 +399,20 @@ fun CreatorDashboardView(
             }
         }
 
-        // 4. Primary Studios Cards
+        // 4. Primary Studios Cards (सफल Run #13 जैसा बिल्कुल शुद्ध इनलाइन कोड)
         item {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 primaryShortcuts.forEach { shortcut ->
-                    StudioCard(
-                        shortcut = shortcut,
-                        onClick = { viewModel.loadUrl(shortcut.url) }
-                    )
-                }
-            }
-        }
-
-        // 5. MORE CREATOR PLATFORMS Header
-        item {
-            Text(
-                text = "MORE CREATOR PLATFORMS",
-                color = TextPrimary,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 0.8.sp
-            )
-        }
-
-        // 6. Grid Tiles (TikTok, X, Canva, Twitch)
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                PlatformTile(
-                    title = "TikTok Studio",
-                    category = "Video & Audio",
-                    icon = Icons.Default.MusicNote,
-                    iconColor = TikTokColor,
-                    modifier = Modifier.weight(1f),
-                    onClick = { viewModel.loadUrl("https://www.tiktok.com/creator-center") }
-                )
-                PlatformTile(
-                    title = "X / Twitter",
-                    category = "Social Media",
-                    icon = Icons.Default.Share,
-                    iconColor = TwitterColor,
-                    modifier = Modifier.weight(1f),
-                    onClick = { viewModel.loadUrl("https://x.com") }
-                )
-            }
-        }
-
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                PlatformTile(
-                    title = "Canva Web",
-                    category = "Design",
-                    icon = Icons.Default.Palette,
-                    iconColor = CanvaColor,
-                    modifier = Modifier.weight(1f),
-                    onClick = { viewModel.loadUrl("https://www.canva.com") }
-                )
-                PlatformTile(
-                    title = "Twitch Dash...",
-                    category = "Streaming",
-                    icon = Icons.Default.Tv,
-                    iconColor = TwitchColor,
-                    modifier = Modifier.weight(1f),
-                    onClick = { viewModel.loadUrl("https://dashboard.twitch.tv") }
-                )
-            }
-        }
-
-        // 7. Action Tools (Scratchpad, Bookmarks, Sandbox, New Tab)
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                ActionToolItem(
-                    title = "Scratchpad",
-                    icon = Icons.Default.EditNote,
-                    color = CreatorRoseLight,
-                    onClick = { viewModel.setShowNotesDrawer(true) }
-                )
-                ActionToolItem(
-                    title = "Bookmark
+                    Card(
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = DarkSurface),
+                        border = BorderStroke(1.dp, DarkBorder),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { viewModel.loadUrl(shortcut.url) }
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(14.dp),
+                   
