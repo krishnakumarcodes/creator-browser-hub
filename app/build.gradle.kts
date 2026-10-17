@@ -1,192 +1,116 @@
-package com.example.ui.components
-import android.annotation.SuppressLint
-import android.app.Activity
-import android.app.DownloadManager
-import android.content.Context
-import android.content.Intent
-import android.content.pm.ActivityInfo
-import android.graphics.Bitmap
-import android.graphics.Color as AndroidColor
-import android.net.Uri
-import android.os.Build
-import android.os.Environment
-import android.os.Message
-import android.print.PrintAttributes
-import android.print.PrintManager
-import android.view.MotionEvent
-import android.view.View
-import android.view.ViewGroup
-import android.webkit.*
-import android.widget.FrameLayout
-import android.widget.Toast
-import androidx.activity.compose.BackHandler
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.viewinterop.AndroidView
-import com.example.data.model.BrowserTab
-import com.example.viewmodel.BrowserViewModel
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.google.devtools.ksp)
+    alias(libs.plugins.secrets)
+    alias(libs.plugins.google.services)
+}
 
-@SuppressLint("SetJavaScriptEnabled", "ClickableViewAccessibility")
-@Composable
-fun CreatorWebView(
-    tab: BrowserTab,
-    viewModel: BrowserViewModel,
-    modifier: Modifier = Modifier
-) {
-    val context = LocalContext.current
-    val activity = context as? Activity
-    var webViewInstance by remember { mutableStateOf<WebView?>(null) }
-    var filePathCallback by remember { mutableStateOf<ValueCallback<Array<Uri>>?>(null) }
-    val isDarkMode by viewModel.isDarkMode.collectAsState()
+android {
+    namespace = "com.aistudio.creatorbrowser.vptmqz"
+    compileSdk = 34
 
-    // PDF प्रिंट जॉब ट्रिगर
-    val printJobTrigger by viewModel.printJobTrigger.collectAsState()
-    LaunchedEffect(printJobTrigger) {
-        if (printJobTrigger && webViewInstance != null) {
-            val wv = webViewInstance
-            if (wv != null) {
-                try {
-                    val printManager = context.getSystemService(Context.PRINT_SERVICE) as PrintManager
-                    val jobName = "${tab.title.ifBlank { "CreatorBrowser" }}_Document"
-                    val printAdapter = wv.createPrintDocumentAdapter(jobName)
-                    printManager.print(jobName, printAdapter, PrintAttributes.Builder().build())
-                } catch (e: Exception) {
-                    Toast.makeText(context, "PDF सेव करने में असमर्थ", Toast.LENGTH_SHORT).show()
-                }
-            }
-            viewModel.consumePrintTrigger()
+    defaultConfig {
+        applicationId = "com.aistudio.creatorbrowser.vptmqz"
+        minSdk = 24
+        targetSdk = 34
+        versionCode = System.getenv("GITHUB_RUN_NUMBER")?.toInt() ?: 1
+        versionName = "1.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        create("release") {
+            val keystorePath = System.getenv("KEYSTORE_PATH") ?: "${rootDir}/my-upload-key.jks"
+            storeFile = file(keystorePath)
+            storePassword = System.getenv("STORE_PASSWORD")
+            keyAlias = "upload"
+            keyPassword = System.getenv("KEY_PASSWORD")
+        }
+        create("debugConfig") {
+            storeFile = file("${rootDir}/debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
         }
     }
 
-    // लाइट / डार्क मोड बैकग्राउंड और थीम सिंक
-    LaunchedEffect(isDarkMode) {
-        webViewInstance?.let { wv ->
-            if (isDarkMode) {
-                wv.setBackgroundColor(AndroidColor.parseColor("#090A10"))
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    wv.settings.isAlgorithmicDarkeningAllowed = true
-                }
-            } else {
-                wv.setBackgroundColor(AndroidColor.WHITE)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    wv.settings.isAlgorithmicDarkeningAllowed = false
-                }
-            }
+    buildTypes {
+        release {
+            isCrunchPngs = false
+            isMinifyEnabled = false
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.getByName("release")
+        }
+        debug {
+            signingConfig = signingConfigs.getByName("debugConfig")
         }
     }
 
-    var customView by remember { mutableStateOf<View?>(null) }
-    var customViewCallback by remember { mutableStateOf<WebChromeClient.CustomViewCallback?>(null) }
-
-    BackHandler(enabled = customView != null) {
-        customViewCallback?.onCustomViewHidden()
-        customView = null
-        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
-    val fileChooserLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == Activity.RESULT_OK && result.data != null) {
-            val clipData = result.data?.clipData
-            val data = result.data?.data
-            val results: Array<Uri> = when {
-                clipData != null -> Array(clipData.itemCount) { i -> clipData.getItemAt(i).uri }
-                data != null -> arrayOf(data)
-                else -> emptyArray()
-            }
-            filePathCallback?.onReceiveValue(results)
-        } else {
-            filePathCallback?.onReceiveValue(null)
-        }
-        filePathCallback = null
+    buildFeatures {
+        compose = true
+        buildConfig = true
     }
 
-    val webAction by viewModel.webAction.collectAsState()
-    LaunchedEffect(webAction) {
-        val wv = webViewInstance ?: return@LaunchedEffect
-        when (val action = webAction) {
-            is BrowserViewModel.WebAction.LoadUrl -> {
-                if (action.url.isNotBlank() && action.url != "about:blank") {
-                    wv.loadUrl(action.url)
-                }
-                viewModel.consumeWebAction()
-            }
-            is BrowserViewModel.WebAction.GoBack -> {
-                if (wv.canGoBack()) wv.goBack()
-                viewModel.consumeWebAction()
-            }
-            is BrowserViewModel.WebAction.GoForward -> {
-                if (wv.canGoForward()) wv.goForward()
-                viewModel.consumeWebAction()
-            }
-            is BrowserViewModel.WebAction.Reload -> {
-                wv.reload()
-                viewModel.consumeWebAction()
-            }
-            is BrowserViewModel.WebAction.StopLoading -> {
-                wv.stopLoading()
-                viewModel.consumeWebAction()
-            }
-            is BrowserViewModel.WebAction.ToggleDesktop -> {
-                wv.settings.userAgentString = if (action.enabled) {
-                    BrowserViewModel.DESKTOP_USER_AGENT
-                } else {
-                    BrowserViewModel.MOBILE_USER_AGENT
-                }
-                wv.reload()
-                viewModel.consumeWebAction()
-            }
-            is BrowserViewModel.WebAction.None -> {}
-        }
+    testOptions {
+        unitTests { isIncludeAndroidResources = true }
     }
 
-    Box(modifier = modifier.fillMaxSize()) {
-        AndroidView(
-            modifier = Modifier.fillMaxSize(),
-            factory = { ctx ->
-                WebView(ctx).apply {
-                    layoutParams = ViewGroup.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT
-                    )
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = true
+    }
+}
 
-                    setBackgroundColor(if (isDarkMode) AndroidColor.parseColor("#090A10") else AndroidColor.WHITE)
+dependencies {
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.compose.material.icons.core)
+    implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.graphics)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.converter.moshi)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.logging.interceptor)
+    implementation(libs.moshi.kotlin)
+    implementation(libs.okhttp)
+    implementation(libs.retrofit)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
 
-                    settings.apply {
-                        javaScriptEnabled = true
-                        domStorageEnabled = true
-                        databaseEnabled = true
-                        useWideViewPort = true
-                        loadWithOverviewMode = true
-                        builtInZoomControls = true
-                        displayZoomControls = false
-                        setSupportZoom(true)
-                        mediaPlaybackRequiresUserGesture = false
-                        allowFileAccess = true
-                        allowContentAccess = true
-                        mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-                        javaScriptCanOpenWindowsAutomatically = true
-                        setSupportMultipleWindows(true) // HDHub4u और पॉपअप विंडो के लिए अनिवार्य
+    testImplementation(libs.androidx.compose.ui.test.junit4)
+    testImplementation(libs.androidx.core)
+    testImplementation(libs.androidx.junit)
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.robolectric)
 
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            isAlgorithmicDarkeningAllowed = isDarkMode
-                        }
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.runner)
 
-                        userAgentString = if (tab.isDesktopMode) {
-                            BrowserViewModel.DESKTOP_USER_AGENT
-                        } else {
-                            BrowserViewModel.MOBILE_USER_AGENT
-                        }
-                    }
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
+    debugImplementation(libs.androidx.compose.ui.tooling)
 
-                    val cookieManager = CookieManager.getInstance()
-                    cookieManager.setAcceptCookie(true)
-                    cookieManager.setAcceptThirdPartyCookies(this, true)
+    "ksp"(libs.androidx.room.compiler)
+    "ksp"(libs.moshi.kotlin.codegen)
+}
 
-                    var startY = 0f
