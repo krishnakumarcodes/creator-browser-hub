@@ -11,9 +11,6 @@ import android.graphics.Color as AndroidColor
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
-import android.print.PrintAttributes
-import android.print.PrintManager
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.*
@@ -31,7 +28,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.example.data.model.BrowserTab
 import com.example.viewmodel.BrowserViewModel
 
-@SuppressLint("SetJavaScriptEnabled", "ClickableViewAccessibility")
+@SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun CreatorWebView(
     tab: BrowserTab,
@@ -43,42 +40,6 @@ fun CreatorWebView(
     var webViewInstance by remember { mutableStateOf<WebView?>(null) }
     var filePathCallback by remember { mutableStateOf<ValueCallback<Array<Uri>>?>(null) }
     val isDarkMode by viewModel.isDarkMode.collectAsState()
-
-    // 📄 सेव पीडीएफ ट्रिगर
-    val printJobTrigger by viewModel.printJobTrigger.collectAsState()
-    LaunchedEffect(printJobTrigger) {
-        if (printJobTrigger && webViewInstance != null) {
-            val wv = webViewInstance
-            if (wv != null) {
-                try {
-                    val printManager = context.getSystemService(Context.PRINT_SERVICE) as PrintManager
-                    val jobName = "${tab.title.ifBlank { "CreatorBrowser" }}_Document"
-                    val printAdapter = wv.createPrintDocumentAdapter(jobName)
-                    printManager.print(jobName, printAdapter, PrintAttributes.Builder().build())
-                } catch (e: Exception) {
-                    Toast.makeText(context, "PDF सेव करने में असमर्थ", Toast.LENGTH_SHORT).show()
-                }
-            }
-            viewModel.consumePrintTrigger()
-        }
-    }
-
-    // 🌙 ☀️ डार्क / लाइट मोड के अनुसार वेबव्यू का बैकग्राउंड और वेब पेज को बदलना
-    LaunchedEffect(isDarkMode) {
-        webViewInstance?.let { wv ->
-            if (isDarkMode) {
-                wv.setBackgroundColor(AndroidColor.parseColor("#090A10"))
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    wv.settings.isAlgorithmicDarkeningAllowed = true
-                }
-            } else {
-                wv.setBackgroundColor(AndroidColor.WHITE)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    wv.settings.isAlgorithmicDarkeningAllowed = false
-                }
-            }
-        }
-    }
 
     var customView by remember { mutableStateOf<View?>(null) }
     var customViewCallback by remember { mutableStateOf<WebChromeClient.CustomViewCallback?>(null) }
@@ -155,9 +116,7 @@ fun CreatorWebView(
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.MATCH_PARENT
                     )
-
                     setBackgroundColor(if (isDarkMode) AndroidColor.parseColor("#090A10") else AndroidColor.WHITE)
-
                     settings.apply {
                         javaScriptEnabled = true
                         domStorageEnabled = true
@@ -173,11 +132,6 @@ fun CreatorWebView(
                         mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
                         javaScriptCanOpenWindowsAutomatically = true
                         setSupportMultipleWindows(true)
-
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            isAlgorithmicDarkeningAllowed = isDarkMode
-                        }
-
                         userAgentString = if (tab.isDesktopMode) {
                             BrowserViewModel.DESKTOP_USER_AGENT
                         } else {
@@ -188,29 +142,6 @@ fun CreatorWebView(
                     val cookieManager = CookieManager.getInstance()
                     cookieManager.setAcceptCookie(true)
                     cookieManager.setAcceptThirdPartyCookies(this, true)
-
-                    var startY = 0f
-                    var isPullingDown = false
-
-                    setOnTouchListener { v, event ->
-                        when (event.action) {
-                            MotionEvent.ACTION_DOWN -> {
-                                startY = event.y
-                                isPullingDown = false
-                            }
-                            MotionEvent.ACTION_MOVE -> {
-                                if (v.scrollY == 0 && event.y - startY > 220f && !isPullingDown) {
-                                    isPullingDown = true
-                                    reload()
-                                    Toast.makeText(ctx, "पेज रीफ़्रेश हो रहा है...", Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                                isPullingDown = false
-                            }
-                        }
-                        false
-                    }
 
                     webViewClient = object : WebViewClient() {
                         override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
@@ -228,22 +159,12 @@ fun CreatorWebView(
                                     canGoForward = view?.canGoForward() ?: false
                                 )
                             }
-                            // यदि लाइट मोड है तो वेबपेज को सफ़ेद थीम पर स्विच करने का JS सिग्नल
-                            if (!isDarkMode) {
-                                view?.evaluateJavascript(
-                                    """
-                                    document.documentElement.classList.remove('dark');
-                                    document.documentElement.setAttribute('data-theme', 'light');
-                                    """.trimIndent(), null
-                                )
-                            }
                         }
 
                         override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                             val uri = request?.url ?: return false
                             val scheme = uri.scheme ?: return false
                             if (scheme == "http" || scheme == "https") return false
-
                             return try {
                                 val intent = Intent(Intent.ACTION_VIEW, uri)
                                 context.startActivity(intent)
@@ -324,18 +245,17 @@ fun CreatorWebView(
                                 if (cookies != null) {
                                     addRequestHeader("Cookie", cookies)
                                 }
-                                setDescription("फ़ाइल डाउनलोड हो रही है...")
+                                setDescription("Downloading file...")
                                 val filename = URLUtil.guessFileName(downloadUrl, contentDisposition, mimetype)
                                 setTitle(filename)
                                 setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
                                 setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, filename)
                             }
-
                             val dm = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
                             dm.enqueue(request)
-                            Toast.makeText(context, "डाउनलोड शुरू हो गया...", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Download started...", Toast.LENGTH_SHORT).show()
                         } catch (e: Exception) {
-                            Toast.makeText(context, "डाउनलोड त्रुटि: ${e.message}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Download error: ${e.message}", Toast.LENGTH_SHORT).show()
                         }
                     }
 
