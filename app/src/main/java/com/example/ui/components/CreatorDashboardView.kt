@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -38,7 +39,7 @@ fun CreatorDashboardView(
         contentPadding = PaddingValues(top = 16.dp, bottom = 32.dp),
         verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
-        // 1. ओरिजिनल हेडर (ब्रांड लोगो और टाइटल्स)
+        // 1. Header Card
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -71,18 +72,15 @@ fun CreatorDashboardView(
                         Column {
                             Text(
                                 text = "CREATOR BROWSER HUB",
-                                style = MaterialTheme.typography.titleMedium.copy(
-                                    fontWeight = FontWeight.ExtraBold,
-                                    color = TextPrimary,
-                                    letterSpacing = 1.sp
-                                )
+                                color = TextPrimary,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                letterSpacing = 1.sp
                             )
                             Text(
                                 text = "Native Multi-Tab Workspace",
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    color = TextSecondary,
-                                    fontSize = 12.sp
-                                )
+                                color = TextSecondary,
+                                fontSize = 12.sp
                             )
                         }
                     }
@@ -109,10 +107,9 @@ fun CreatorDashboardView(
                                 )
                                 Text(
                                     text = "Desktop Mode Default",
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        color = TextPrimary,
-                                        fontWeight = FontWeight.Medium
-                                    )
+                                    color = TextPrimary,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Medium
                                 )
                             }
                         }
@@ -135,10 +132,9 @@ fun CreatorDashboardView(
                                 )
                                 Text(
                                     text = "Local Cookie Sandbox",
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        color = CreatorGreen,
-                                        fontWeight = FontWeight.Medium
-                                    )
+                                    color = CreatorGreen,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Medium
                                 )
                             }
                         }
@@ -147,7 +143,7 @@ fun CreatorDashboardView(
             }
         }
 
-        // 2. PRIMARY CREATOR STUDIOS सेक्शन
+        // 2. PRIMARY CREATOR STUDIOS Header
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -156,29 +152,27 @@ fun CreatorDashboardView(
             ) {
                 Text(
                     text = "PRIMARY CREATOR STUDIOS",
-                    style = MaterialTheme.typography.labelLarge.copy(
-                        color = TextPrimary,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 0.8.sp
-                    )
+                    color = TextPrimary,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.8.sp
                 )
                 Surface(
                     shape = RoundedCornerShape(8.dp),
-                    color = CreatorVioletContainer.copy(alpha = 0.4f)
+                    color = CreatorVioletContainer
                 ) {
                     Text(
                         text = "Instant Desktop Load",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            color = CreatorVioletLight,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 10.sp
-                        ),
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                        color = CreatorVioletLight,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 10.sp,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                     )
                 }
             }
         }
 
+        // 3. Primary Studios Cards
         item {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 primaryShortcuts.forEach { shortcut ->
@@ -199,8 +193,8 @@ fun CreatorDashboardView(
                         ) {
                             Surface(
                                 shape = RoundedCornerShape(12.dp),
-                                color = shortcut.brandColor.copy(alpha = 0.2f),
-                                border = BorderStroke(1.dp, shortcut.brandColor.copy(alpha = 0.35f)),
+                                color = DarkSurfaceElevated,
+                                border = BorderStroke(1.dp, shortcut.brandColor),
                                 modifier = Modifier.size(46.dp)
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
@@ -219,11 +213,9 @@ fun CreatorDashboardView(
                                 ) {
                                     Text(
                                         text = shortcut.name,
-                                        style = MaterialTheme.typography.titleMedium.copy(
-                                            fontWeight = FontWeight.Bold,
-                                            color = TextPrimary,
-                                            fontSize = 15.sp
-                                        )
+                                        color = TextPrimary,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 15.sp
                                     )
                                     Surface(
                                         shape = RoundedCornerShape(6.dp),
@@ -231,5 +223,252 @@ fun CreatorDashboardView(
                                     ) {
                                         Text(
                                             text = shortcut.category,
-                                            style = MaterialTheme.typography.label
-                                            
+                                            color = TextSecondary,
+                                            fontSize = 9.sp,
+                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                        )
+                                    }
+                                }
+                                Text(
+                                    text = shortcut.description,
+                                    color = TextSecondary,
+                                    fontSize = 12.sp,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                            Icon(
+                                imageVector = Icons.Default.ChevronRight,
+                                contentDescription = "Open",
+                                tint = TextMuted,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        // 4. MORE CREATOR PLATFORMS Header
+        item {
+            Text(
+                text = "MORE CREATOR PLATFORMS",
+                color = TextPrimary,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 0.8.sp
+            )
+        }
+
+        // 5. Grid Tiles
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                PlatformTile(
+                    title = "TikTok Studio",
+                    category = "Video & Audio",
+                    icon = Icons.Default.MusicNote,
+                    iconColor = TikTokColor,
+                    modifier = Modifier.weight(1f),
+                    onClick = { viewModel.loadUrl("https://www.tiktok.com/creator-center") }
+                )
+                PlatformTile(
+                    title = "X / Twitter",
+                    category = "Social Media",
+                    icon = Icons.Default.Share,
+                    iconColor = TwitterColor,
+                    modifier = Modifier.weight(1f),
+                    onClick = { viewModel.loadUrl("https://x.com") }
+                )
+            }
+        }
+
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                PlatformTile(
+                    title = "Canva Web",
+                    category = "Design",
+                    icon = Icons.Default.Palette,
+                    iconColor = CanvaColor,
+                    modifier = Modifier.weight(1f),
+                    onClick = { viewModel.loadUrl("https://www.canva.com") }
+                )
+                PlatformTile(
+                    title = "Twitch Dash...",
+                    category = "Streaming",
+                    icon = Icons.Default.Tv,
+                    iconColor = TwitchColor,
+                    modifier = Modifier.weight(1f),
+                    onClick = { viewModel.loadUrl("https://dashboard.twitch.tv") }
+                )
+            }
+        }
+
+        // 6. Action Tools (Scratchpad, Bookmarks, Sandbox, New Tab)
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                ActionToolItem(
+                    title = "Scratchpad",
+                    icon = Icons.Default.EditNote,
+                    color = CreatorRoseLight,
+                    onClick = { viewModel.setShowNotesDrawer(true) }
+                )
+                ActionToolItem(
+                    title = "Bookmarks",
+                    icon = Icons.Default.Bookmark,
+                    color = CreatorCyanLight,
+                    onClick = { viewModel.setShowBookmarksHistory(true) }
+                )
+                ActionToolItem(
+                    title = "Sandbox",
+                    icon = Icons.Default.Security,
+                    color = CreatorGreen,
+                    onClick = { viewModel.setShowSecurityDialog(true) }
+                )
+                ActionToolItem(
+                    title = "New Tab",
+                    icon = Icons.Default.Add,
+                    color = CreatorVioletLight,
+                    onClick = { viewModel.addNewTab() }
+                )
+            }
+        }
+
+        // 7. Full Desktop Experience Card
+        item {
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = DarkSurface),
+                border = BorderStroke(1.dp, DarkBorder),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Lightbulb,
+                        contentDescription = null,
+                        tint = CreatorAmber,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(
+                            text = "Full Desktop Experience on Android",
+                            color = TextPrimary,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
+                        )
+                        Text(
+                            text = "Creator Hub presents a desktop Chrome identifier to YouTube Studio and Meta Business, unlocking video upload dialogues, end-screen editors, live chat monitoring, and in-depth analytics.",
+                            color = TextSecondary,
+                            fontSize = 12.sp,
+                            lineHeight = 18.sp
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PlatformTile(
+    title: String,
+    category: String,
+    icon: ImageVector,
+    iconColor: Color,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Card(
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = DarkSurface),
+        border = BorderStroke(1.dp, DarkBorder),
+        modifier = modifier.clickable(onClick = onClick)
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Surface(
+                shape = RoundedCornerShape(10.dp),
+                color = DarkSurfaceElevated,
+                border = BorderStroke(1.dp, iconColor),
+                modifier = Modifier.size(38.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = iconColor,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+            Column {
+                Text(
+                    text = title,
+                    color = TextPrimary,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = category,
+                    color = TextSecondary,
+                    fontSize = 10.sp
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ActionToolItem(
+    title: String,
+    icon: ImageVector,
+    color: Color,
+    onClick: () -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+        modifier = Modifier
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick)
+            .padding(8.dp)
+    ) {
+        Surface(
+            shape = CircleShape,
+            color = DarkSurfaceElevated,
+            border = BorderStroke(1.dp, color),
+            modifier = Modifier.size(46.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = title,
+                    tint = color,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+        }
+        Text(
+            text = title,
+            color = TextPrimary,
+            fontWeight = FontWeight.Medium,
+            fontSize = 11.sp
+        )
+    }
+}
