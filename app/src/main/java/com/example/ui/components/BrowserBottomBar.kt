@@ -1,6 +1,5 @@
 package com.example.ui.components
 
-import android.content.Intent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -16,7 +15,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -32,7 +30,6 @@ fun BrowserBottomBar(
     viewModel: BrowserViewModel,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
     val showMoreMenu by viewModel.showMoreMenu.collectAsState()
 
     Surface(
@@ -188,7 +185,24 @@ fun BrowserBottomBar(
                         }
                     )
 
-                    if (!tab.isHome) {
-                        DropdownMenuItem(
-                            text = { Text("
-                                          
+                    HorizontalDivider(color = DarkBorder, modifier = Modifier.padding(vertical = 4.dp))
+
+                    DropdownMenuItem(
+                        text = { Text("Clear Cache & Cookies", color = CreatorRoseLight) },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.DeleteOutline,
+                                contentDescription = null,
+                                tint = CreatorRose
+                            )
+                        },
+                        onClick = {
+                            viewModel.setShowMoreMenu(false)
+                            viewModel.clearCacheAndCookies()
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
