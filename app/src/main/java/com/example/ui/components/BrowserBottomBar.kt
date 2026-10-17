@@ -34,7 +34,6 @@ fun BrowserBottomBar(
 ) {
     val context = LocalContext.current
     val showMoreMenu by viewModel.showMoreMenu.collectAsState()
-    val isDarkMode by viewModel.isDarkMode.collectAsState()
 
     Surface(
         modifier = modifier.fillMaxWidth(),
@@ -50,7 +49,7 @@ fun BrowserBottomBar(
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Back Button
+            // 1. Back Button
             IconButton(
                 onClick = { viewModel.goBack() },
                 enabled = tab.canGoBack || !tab.isHome,
@@ -63,7 +62,7 @@ fun BrowserBottomBar(
                 )
             }
 
-            // Forward Button
+            // 2. Forward Button
             IconButton(
                 onClick = { viewModel.goForward() },
                 enabled = tab.canGoForward,
@@ -76,7 +75,7 @@ fun BrowserBottomBar(
                 )
             }
 
-            // Home Dashboard Button
+            // 3. Home Dashboard Button
             IconButton(
                 onClick = { viewModel.navigateHome() },
                 modifier = Modifier.testTag("nav_home_button")
@@ -88,7 +87,7 @@ fun BrowserBottomBar(
                 )
             }
 
-            // Tabs Counter Button
+            // 4. Tabs Counter Button
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
@@ -100,15 +99,13 @@ fun BrowserBottomBar(
             ) {
                 Text(
                     text = tabCount.toString(),
-                    style = MaterialTheme.typography.labelMedium.copy(
-                        color = CreatorVioletLight,
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 13.sp
-                    )
+                    color = CreatorVioletLight,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 13.sp
                 )
             }
 
-            // Three-Dots Menu (⋮)
+            // 5. Three-Dots Menu (⋮)
             Box {
                 IconButton(
                     onClick = { viewModel.setShowMoreMenu(true) },
@@ -145,61 +142,6 @@ fun BrowserBottomBar(
                             viewModel.toggleDesktopMode()
                         }
                     )
-
-                    // 🌙 ☀️ 1. काली / सफ़ेद स्क्रीन (Theme Toggle)
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                text = if (isDarkMode) "सफ़ेद (Light) स्क्रीन चालू करें" else "काली (Dark) स्क्रीन चालू करें",
-                                color = TextPrimary
-                            )
-                        },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = if (isDarkMode) Icons.Default.LightMode else Icons.Default.DarkMode,
-                                contentDescription = null,
-                                tint = CreatorVioletLight
-                            )
-                        },
-                        onClick = {
-                            viewModel.setShowMoreMenu(false)
-                            viewModel.toggleThemeMode()
-                        }
-                    )
-
-                    // 📥 2. डाउनलोड्स मैनेजर स्क्रीन
-                    DropdownMenuItem(
-                        text = { Text("Downloads (डाउनलोड्स)", color = TextPrimary) },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Download,
-                                contentDescription = null,
-                                tint = CreatorCyanLight
-                            )
-                        },
-                        onClick = {
-                            viewModel.setShowMoreMenu(false)
-                            viewModel.setShowDownloadsSheet(true)
-                        }
-                    )
-
-                    // 📄 3. सेव पीडीएफ (Save as PDF / Print)
-                    if (!tab.isHome) {
-                        DropdownMenuItem(
-                            text = { Text("Save as PDF / Print", color = TextPrimary) },
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.PictureAsPdf,
-                                    contentDescription = null,
-                                    tint = CreatorRoseLight
-                                )
-                            },
-                            onClick = {
-                                viewModel.setShowMoreMenu(false)
-                                viewModel.triggerPrintJob()
-                            }
-                        )
-                    }
 
                     DropdownMenuItem(
                         text = { Text("Bookmarks & History", color = TextPrimary) },
@@ -248,43 +190,5 @@ fun BrowserBottomBar(
 
                     if (!tab.isHome) {
                         DropdownMenuItem(
-                            text = { Text("Share Page Link", color = TextPrimary) },
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.Share,
-                                    contentDescription = null,
-                                    tint = TextSecondary
-                                )
-                            },
-                            onClick = {
-                                viewModel.setShowMoreMenu(false)
-                                val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                                    type = "text/plain"
-                                    putExtra(Intent.EXTRA_TEXT, tab.url)
-                                }
-                                context.startActivity(Intent.createChooser(shareIntent, "Share URL"))
-                            }
-                        )
-                    }
-
-                    HorizontalDivider(color = DarkBorder, modifier = Modifier.padding(vertical = 4.dp))
-
-                    DropdownMenuItem(
-                        text = { Text("Clear Cache & Cookies", color = CreatorRoseLight) },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.DeleteOutline,
-                                contentDescription = null,
-                                tint = CreatorRose
-                            )
-                        },
-                        onClick = {
-                            viewModel.setShowMoreMenu(false)
-                            viewModel.clearCacheAndCookies()
-                        }
-                    )
-                }
-            }
-        }
-    }
-}
+                            text = { Text("
+                                          
