@@ -252,7 +252,7 @@ fun CreatorDashboardView(
             }
         }
 
-        // 2. FAVORITE WEBSITES (QUICK ACCESS) 4-कॉलम ग्रिड (Add पहले, फिर ऐप्स)
+        // 2. FAVORITE WEBSITES (QUICK ACCESS) 4-कॉलम ग्रिड
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -371,7 +371,7 @@ fun CreatorDashboardView(
             }
         }
 
-        // 3. PRIMARY CREATOR STUDIOS
+        // 3. PRIMARY CREATOR STUDIOS Header
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -404,25 +404,16 @@ fun CreatorDashboardView(
         item {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 primaryShortcuts.forEach { shortcut ->
-                    StudioCard(
-                        shortcut = shortcut,
-                        onClick = { viewModel.loadUrl(shortcut.url) }
-                    )
-                }
-            }
-        }
-
-        // 5. MORE CREATOR PLATFORMS
-        item {
-            Text(
-                text = "MORE CREATOR PLATFORMS",
-                color = TextPrimary,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 0.8.sp
-            )
-        }
-
-        // 6. Grid Tiles (TikTok, X, Canva, Twitch)
-        item {
-       
+                    Card(
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = DarkSurface),
+                        border = BorderStroke(1.dp, DarkBorder),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { viewModel.loadUrl(shortcut.url) }
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(14.dp),
+ 
