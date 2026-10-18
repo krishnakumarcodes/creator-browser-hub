@@ -17,45 +17,24 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.theme.*
 import com.example.viewmodel.BrowserViewModel
 
-// 🎨 साइबरपंक नियॉन कलर्स और ग्रेडिएंट
-private val CyberBg = Color(0xFF08071A)
-private val CyberCardBg = Color(0xE6121026)
-private val NeonPink = Color(0xFFFF2E93)
-private val NeonCyan = Color(0xFF00F0FF)
-private val NeonGreen = Color(0xFF10FFA0)
-private val NeonAmber = Color(0xFFFFB800)
-private val NeonPurple = Color(0xFF9D4EDD)
-
-private val CyberGradient = Brush.horizontalGradient(
-    listOf(NeonPurple, NeonPink, NeonCyan, NeonGreen)
-)
-
-data class QuickActionItem(
+data class CyberAppItem(
     val id: String,
     val name: String,
     val url: String,
     val initial: String,
-    val glowColor: Color
+    val color: Color
 )
 
-data class ProjectPillItem(
+data class CyberProjectItem(
     val title: String,
     val url: String,
-    val iconInitial: String,
-    val iconBgColor: Color
-)
-
-data class MiniApp(
     val initial: String,
-    val name: String,
-    val url: String,
     val color: Color
 )
 
@@ -64,32 +43,35 @@ fun CreatorDashboardView(
     viewModel: BrowserViewModel,
     modifier: Modifier = Modifier
 ) {
-    var showAddDialog by remember { mutableStateOf(false) }
-    var newShortcutName by remember { mutableStateOf("") }
-    var newShortcutUrl by remember { mutableStateOf("") }
+    // 🎨 नियॉन कलर्स और ग्रेडिएंट
+    val cyberBg = Color(0xFF08071A)
+    val cyberCardBg = Color(0xE6121026)
+    val neonPink = Color(0xFFFF2E93)
+    val neonCyan = Color(0xFF00F0FF)
+    val neonGreen = Color(0xFF10FFA0)
+    val neonAmber = Color(0xFFFFB800)
+    val neonPurple = Color(0xFF9D4EDD)
 
-    // 🟢 पसंदीदा ऐप्स लिस्ट (WhatsApp, YouTube, Spotify)
+    val cyberGradient = Brush.horizontalGradient(
+        listOf(neonPurple, neonPink, neonCyan, neonGreen)
+    )
+
+    var showAddDialog by remember { mutableStateOf(false) }
+    var newName by remember { mutableStateOf("") }
+    var newUrl by remember { mutableStateOf("") }
+
+    // 🟢 पसंदीदा ऐप्स लिस्ट (WhatsApp, YouTube, Spotify + naye apps)
     var favoriteApps by remember {
         mutableStateOf(
             listOf(
-                QuickActionItem("whatsapp", "WhatsApp", "https://web.whatsapp.com", "W", Color(0xFF25D366)),
-                QuickActionItem("youtube", "YouTube", "https://www.youtube.com", "Y", Color(0xFFFF0000)),
-                QuickActionItem("spotify", "Spotify", "https://open.spotify.com", "S", Color(0xFF1DB954))
+                CyberAppItem("whatsapp", "WhatsApp", "https://web.whatsapp.com", "W", Color(0xFF25D366)),
+                CyberAppItem("youtube", "YouTube", "https://www.youtube.com", "Y", Color(0xFFFF0000)),
+                CyberAppItem("spotify", "Spotify", "https://open.spotify.com", "S", Color(0xFF1DB954))
             )
         )
     }
 
-    // 🟢 2-कॉलम प्रोजेक्ट पिल्स (Github, Figma, Unsplash, Notion)
-    val projectPills = remember {
-        listOf(
-            ProjectPillItem("Github Repo Rework", "https://github.com", "G", Color(0xFF24292E)),
-            ProjectPillItem("Figma Wireframes", "https://www.figma.com", "F", Color(0xFFA259FF)),
-            ProjectPillItem("Unsplash Curated Photos", "https://unsplash.com", "U", Color(0xFF111111)),
-            ProjectPillItem("Notion Content Calendar", "https://www.notion.so", "N", Color(0xFF000000))
-        )
-    }
-
-    // ➕ कस्टम शॉर्टकट जोड़ने का डायलॉग
+    // ➕ नया शॉर्टकट जोड़ने का डायलॉग
     if (showAddDialog) {
         AlertDialog(
             onDismissRequest = { showAddDialog = false },
@@ -105,26 +87,26 @@ fun CreatorDashboardView(
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     OutlinedTextField(
-                        value = newShortcutName,
-                        onValueChange = { newShortcutName = it },
+                        value = newName,
+                        onValueChange = { newName = it },
                         label = { Text("नाम (उदा. Twitter / X)") },
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedTextColor = TextPrimary,
                             unfocusedTextColor = TextPrimary,
-                            focusedBorderColor = NeonCyan,
+                            focusedBorderColor = neonCyan,
                             unfocusedBorderColor = DarkBorder
                         )
                     )
                     OutlinedTextField(
-                        value = newShortcutUrl,
-                        onValueChange = { newShortcutUrl = it },
+                        value = newUrl,
+                        onValueChange = { newUrl = it },
                         label = { Text("URL (उदा. x.com)") },
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedTextColor = TextPrimary,
                             unfocusedTextColor = TextPrimary,
-                            focusedBorderColor = NeonCyan,
+                            focusedBorderColor = neonCyan,
                             unfocusedBorderColor = DarkBorder
                         )
                     )
@@ -133,27 +115,27 @@ fun CreatorDashboardView(
             confirmButton = {
                 Button(
                     onClick = {
-                        if (newShortcutName.isNotBlank() && newShortcutUrl.isNotBlank()) {
-                            val cleanUrl = if (newShortcutUrl.startsWith("http://") || newShortcutUrl.startsWith("https://")) {
-                                newShortcutUrl.trim()
+                        if (newName.isNotBlank() && newUrl.isNotBlank()) {
+                            val cleanUrl = if (newUrl.startsWith("http://") || newUrl.startsWith("https://")) {
+                                newUrl.trim()
                             } else {
-                                "https://${newShortcutUrl.trim()}"
+                                "https://${newUrl.trim()}"
                             }
-                            val newItem = QuickActionItem(
+                            val newItem = CyberAppItem(
                                 id = "custom_${System.currentTimeMillis()}",
-                                name = newShortcutName.trim(),
+                                name = newName.trim(),
                                 url = cleanUrl,
-                                initial = newShortcutName.trim().take(1).uppercase(),
-                                glowColor = NeonCyan
+                                initial = newName.trim().take(1).uppercase(),
+                                color = neonCyan
                             )
                             favoriteApps = favoriteApps + newItem
-                            newShortcutName = ""
-                            newShortcutUrl = ""
+                            newName = ""
+                            newUrl = ""
                             showAddDialog = false
                             viewModel.showMessage("${newItem.name} होम स्क्रीन पर जुड़ गया!")
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = NeonPurple)
+                    colors = ButtonDefaults.buttonColors(containerColor = neonPurple)
                 ) {
                     Text("जोड़ें", color = Color.White)
                 }
@@ -169,20 +151,20 @@ fun CreatorDashboardView(
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .background(CyberBg)
+            .background(cyberBg)
             .padding(horizontal = 16.dp),
         contentPadding = PaddingValues(top = 12.dp, bottom = 28.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // 1. टॉप सर्च बार (Google G + Search Web + Mic)
+        // 1. टॉप सर्च बार (Google 'G' + Search Web + Mic)
         item {
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(54.dp),
                 shape = RoundedCornerShape(27.dp),
-                color = CyberCardBg,
-                border = BorderStroke(1.5.dp, CyberGradient)
+                color = cyberCardBg,
+                border = BorderStroke(1.5.dp, cyberGradient)
             ) {
                 Row(
                     modifier = Modifier
@@ -245,13 +227,13 @@ fun CreatorDashboardView(
             }
         }
 
-        // 2. मुख्य "Creator Nexus" कार्ड (Stats + Workspace, Community, Assets)
+        // 2. मुख्य "Creator Nexus" कार्ड
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = CyberCardBg),
-                border = BorderStroke(1.5.dp, CyberGradient)
+                colors = CardDefaults.cardColors(containerColor = cyberCardBg),
+                border = BorderStroke(1.5.dp, cyberGradient)
             ) {
                 Column(
                     modifier = Modifier.padding(18.dp),
@@ -272,21 +254,21 @@ fun CreatorDashboardView(
                     ) {
                         Text(
                             text = "DAILY CREATION FLOW: 4.2 HRS",
-                            color = NeonPink,
+                            color = neonPink,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 0.8.sp
                         )
                         Text(
                             text = "PROJECTS ACTIVE: 3",
-                            color = NeonCyan,
+                            color = neonCyan,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 0.8.sp
                         )
                         Text(
                             text = "INSPIRATION BLOCKS CLEARED: 12",
-                            color = NeonGreen,
+                            color = neonGreen,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 0.8.sp
@@ -295,188 +277,149 @@ fun CreatorDashboardView(
 
                     Spacer(modifier = Modifier.height(4.dp))
 
+                    // 3 टूलकिट बॉक्सेज़ (WORKSPACE, COMMUNITY, ASSETS)
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        CategoryBox(
-                            title = "WORKSPACE",
-                            borderColor = NeonPink,
-                            modifier = Modifier.weight(1f),
-                            apps = listOf(
-                                MiniApp("F", "Figma", "https://www.figma.com", Color(0xFFA259FF)),
-                                MiniApp("N", "Notion", "https://www.notion.so", Color(0xFF000000)),
-                                MiniApp("V", "VS Code", "https://vscode.dev", Color(0xFF007ACC))
-                            ),
-                            onAppClick = { viewModel.loadUrl(it) }
-                        )
-
-                        CategoryBox(
-                            title = "COMMUNITY",
-                            borderColor = NeonCyan,
-                            modifier = Modifier.weight(1f),
-                            apps = listOf(
-                                MiniApp("D", "Discord", "https://discord.com", Color(0xFF5865F2)),
-                                MiniApp("S", "Slack", "https://slack.com", Color(0xFFE01E5A)),
-                                MiniApp("G", "GitHub", "https://github.com", Color(0xFF24292E))
-                            ),
-                            onAppClick = { viewModel.loadUrl(it) }
-                        )
-
-                        CategoryBox(
-                            title = "ASSETS",
-                            borderColor = NeonAmber,
-                            modifier = Modifier.weight(1f),
-                            apps = listOf(
-                                MiniApp("D", "Drive", "https://drive.google.com", Color(0xFF0F9D58)),
-                                MiniApp("B", "Dropbox", "https://www.dropbox.com", Color(0xFF0061FF)),
-                                MiniApp("C", "Chrome", "https://chrome.google.com", Color(0xFFEA4335))
-                            ),
-                            onAppClick = { viewModel.loadUrl(it) }
-                        )
-                    }
-                }
-            }
-        }
-
-        // 3. क्विक एक्शन सर्कल्स (WhatsApp, YouTube, Spotify, Add new)
-        item {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(22.dp),
-                colors = CardDefaults.cardColors(containerColor = CyberCardBg),
-                border = BorderStroke(1.2.dp, CyberGradient)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 16.dp, horizontal = 10.dp),
-                    horizontalArrangement = Arrangement.SpaceAround,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    favoriteApps.take(3).forEach { app ->
-                        CyberCircleApp(
-                            name = app.name,
-                            initial = app.initial,
-                            glowColor = app.glowColor,
-                            onClick = { viewModel.loadUrl(app.url) }
-                        )
-                    }
-
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(6.dp),
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .clickable { showAddDialog = true }
-                            .padding(4.dp)
-                    ) {
+                        // WORKSPACE BOX
                         Surface(
-                            shape = CircleShape,
-                            color = Color(0xFF1E1736),
-                            border = BorderStroke(1.5.dp, NeonPurple),
-                            modifier = Modifier.size(54.dp)
+                            shape = RoundedCornerShape(14.dp),
+                            color = Color(0xFF16132D),
+                            border = BorderStroke(1.dp, neonPink.copy(alpha = 0.8f)),
+                            modifier = Modifier.weight(1f)
                         ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    imageVector = Icons.Default.Add,
-                                    contentDescription = "Add new",
-                                    tint = NeonPink,
-                                    modifier = Modifier.size(28.dp)
-                                )
+                            Column(
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 8.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(2.dp)
+                                ) {
+                                    Text(
+                                        text = "WORKSPACE",
+                                        color = neonPink,
+                                        fontSize = 9.sp,
+                                        fontWeight = FontWeight.ExtraBold
+                                    )
+                                    Icon(
+                                        imageVector = Icons.Default.Edit,
+                                        contentDescription = null,
+                                        tint = neonPink.copy(alpha = 0.7f),
+                                        modifier = Modifier.size(10.dp)
+                                    )
+                                }
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceAround
+                                ) {
+                                    Surface(
+                                        shape = RoundedCornerShape(6.dp),
+                                        color = Color(0xFFA259FF),
+                                        modifier = Modifier.size(24.dp).clickable { viewModel.loadUrl("https://www.figma.com") }
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Text(text = "F", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                        }
+                                    }
+                                    Surface(
+                                        shape = RoundedCornerShape(6.dp),
+                                        color = Color(0xFF000000),
+                                        modifier = Modifier.size(24.dp).clickable { viewModel.loadUrl("https://www.notion.so") }
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Text(text = "N", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                        }
+                                    }
+                                    Surface(
+                                        shape = RoundedCornerShape(6.dp),
+                                        color = Color(0xFF007ACC),
+                                        modifier = Modifier.size(24.dp).clickable { viewModel.loadUrl("https://vscode.dev") }
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Text(text = "V", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                        }
+                                    }
+                                }
                             }
                         }
-                        Text(
-                            text = "Add new",
-                            color = TextSecondary,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                }
-            }
-        }
 
-        // 4. प्रोजेक्ट्स पिल्स (2-कॉलम: GitHub, Figma, Unsplash, Notion)
-        item {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                projectPills.chunked(2).forEach { rowPills ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        rowPills.forEach { pill ->
-                            CyberProjectPill(
-                                title = pill.title,
-                                iconInitial = pill.iconInitial,
-                                iconBgColor = pill.iconBgColor,
-                                modifier = Modifier.weight(1f),
-                                onClick = { viewModel.loadUrl(pill.url) }
-                            )
+                        // COMMUNITY BOX
+                        Surface(
+                            shape = RoundedCornerShape(14.dp),
+                            color = Color(0xFF16132D),
+                            border = BorderStroke(1.dp, neonCyan.copy(alpha = 0.8f)),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 8.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(2.dp)
+                                ) {
+                                    Text(
+                                        text = "COMMUNITY",
+                                        color = neonCyan,
+                                        fontSize = 9.sp,
+                                        fontWeight = FontWeight.ExtraBold
+                                    )
+                                    Icon(
+                                        imageVector = Icons.Default.Edit,
+                                        contentDescription = null,
+                                        tint = neonCyan.copy(alpha = 0.7f),
+                                        modifier = Modifier.size(10.dp)
+                                    )
+                                }
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceAround
+                                ) {
+                                    Surface(
+                                        shape = RoundedCornerShape(6.dp),
+                                        color = Color(0xFF5865F2),
+                                        modifier = Modifier.size(24.dp).clickable { viewModel.loadUrl("https://discord.com") }
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Text(text = "D", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                        }
+                                    }
+                                    Surface(
+                                        shape = RoundedCornerShape(6.dp),
+                                        color = Color(0xFFE01E5A),
+                                        modifier = Modifier.size(24.dp).clickable { viewModel.loadUrl("https://slack.com") }
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Text(text = "S", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                        }
+                                    }
+                                    Surface(
+                                        shape = RoundedCornerShape(6.dp),
+                                        color = Color(0xFF24292E),
+                                        modifier = Modifier.size(24.dp).clickable { viewModel.loadUrl("https://github.com") }
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Text(text = "G", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                        }
+                                    }
+                                }
+                            }
                         }
-                        if (rowPills.size == 1) {
-                            Spacer(modifier = Modifier.weight(1f))
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
 
-@Composable
-private fun CategoryBox(
-    title: String,
-    borderColor: Color,
-    apps: List<MiniApp>,
-    modifier: Modifier = Modifier,
-    onAppClick: (String) -> Unit
-) {
-    Surface(
-        shape = RoundedCornerShape(14.dp),
-        color = Color(0xFF16132D),
-        border = BorderStroke(1.dp, borderColor.copy(alpha = 0.8f)),
-        modifier = modifier
-    ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 6.dp, vertical = 8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                Text(
-                    text = title,
-                    color = borderColor,
-                    fontSize = 9.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    letterSpacing = 0.5.sp
-                )
-                Icon(
-                    imageVector = Icons.Default.Edit,
-                    contentDescription = null,
-                    tint = borderColor.copy(alpha = 0.7f),
-                    modifier = Modifier.size(10.dp)
-                )
-                Icon(
-                    imageVector = Icons.Default.ArrowDropDown,
-                    contentDescription = null,
-                    tint = borderColor.copy(alpha = 0.7f),
-                    modifier = Modifier.size(12.dp)
-                )
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround
-            ) {
-                apps.forEach { app ->
-                    Surface(
-                        shape = RoundedCornerShape(6.dp),
-                        color = app.color,
-                        modifier = Modifier
-                            .size(24.dp)
-                            .clip(RoundedCornerShape(6.dp))
-                            
+                        // ASSETS BOX
+                        Surface(
+                            shape = RoundedCornerShape(14.dp),
+                            color = Color(0xFF16132D),
+                            border = BorderStroke(1.dp, neonAmber.copy(alpha = 0.8f)),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 8.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                         
