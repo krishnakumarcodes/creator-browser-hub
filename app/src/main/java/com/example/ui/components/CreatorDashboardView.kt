@@ -17,6 +17,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -51,7 +52,12 @@ data class ProjectPillItem(
     val iconBgColor: Color
 )
 
-data class MiniApp(val initial: String, val name: String, val url: String, val color: Color)
+data class MiniApp(
+    val initial: String,
+    val name: String,
+    val url: String,
+    val color: Color
+)
 
 @Composable
 fun CreatorDashboardView(
@@ -168,7 +174,7 @@ fun CreatorDashboardView(
         contentPadding = PaddingValues(top = 12.dp, bottom = 28.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // 1. टॉप सर्च बार (Google 'G' + Search Web + Mic)
+        // 1. टॉप सर्च बार (Google G + Search Web + Mic)
         item {
             Surface(
                 modifier = Modifier
@@ -473,6 +479,4 @@ private fun CategoryBox(
                         modifier = Modifier
                             .size(24.dp)
                             .clip(RoundedCornerShape(6.dp))
-                            .clickable { onAppClick(app.url) }
-                    ) {
-     
+                            
