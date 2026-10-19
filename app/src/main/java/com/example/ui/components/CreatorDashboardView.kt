@@ -5,20 +5,19 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -27,13 +26,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.viewmodel.BrowserViewModel
 
-// 1. शॉर्टकट डेटा मॉडल
-data class DashboardShortcut(
-    val id: String,
-    val title: String,
-    val url: String,
-    val initial: String = title.take(1).uppercase()
-)
+// नियॉन कलर पैलेट
+val NeonPurple = Color(0xFFBD00FF)
+val NeonCyan = Color(0xFF00F0FF)
+val NeonOrange = Color(0xFFFF9900)
+val NeonGreen = Color(0xFF00FF66)
+val DarkCardBg = Color(0xFF13111C)
+val SubtitleGray = Color(0xFF8E8EA0)
 
 @Composable
 fun CreatorDashboardView(
@@ -42,316 +41,367 @@ fun CreatorDashboardView(
     onNavigateToUrl: (String) -> Unit = { url -> viewModel?.loadUrl(url) },
     isDark: Boolean = isSystemInDarkTheme()
 ) {
-    // 4x4 डिफ़ॉल्ट क्विक एक्सेस लिस्ट
-    val shortcuts = remember {
-        mutableStateListOf(
-            DashboardShortcut("1", "Google", "https://www.google.com"),
-            DashboardShortcut("2", "YouTube", "https://www.youtube.com"),
-            DashboardShortcut("3", "Studio", "https://studio.youtube.com"),
-            DashboardShortcut("4", "GitHub", "https://www.github.com"),
-            DashboardShortcut("5", "ChatGPT", "https://chatgpt.com"),
-            DashboardShortcut("6", "Wikipedia", "https://www.wikipedia.org"),
-            DashboardShortcut("7", "Canva", "https://www.canva.com")
-        )
-    }
-
-    var showAddDialog by remember { mutableStateOf(false) }
-    var newTitle by remember { mutableStateOf("") }
-    var newUrl by remember { mutableStateOf("") }
-
     val scrollState = rememberScrollState()
 
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(if (isDark) Color(0xFF121212) else Color(0xFFF8F9FA))
+            .background(Color(0xFF07050E)) // डीप साइबरपंक डार्क बैकग्राउंड
             .verticalScroll(scrollState)
-            .padding(horizontal = 16.dp, vertical = 12.dp)
+            .padding(horizontal = 14.dp, vertical = 10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // हेडर: पसंदीदा वेबसाइट्स (4x4 ग्रिड)
-        Text(
-            text = "पसंदीदा वेबसाइट्स (4x4 ग्रिड)",
-            fontSize = 15.sp,
-            fontWeight = FontWeight.Bold,
-            color = if (isDark) Color(0xFFE8EAED) else Color(0xFF202124),
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
+        // 1. मुख्य Creator Nexus कार्ड
+        CreatorNexusStatsCard()
 
-        // 4x4 ग्रिड कंटेनर (Fixed 4 Columns)
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = if (isDark) Color(0xFF1E1F22) else Color(0xFFFFFFFF)
-            ),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-        ) {
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(4),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(max = 600.dp)
-                    .padding(14.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                userScrollEnabled = false
-            ) {
-                // शॉर्टकट आइटम्स
-                items(shortcuts, key = { it.id }) { item ->
-                    DashboardShortcutItem(
-                        title = item.title,
-                        letter = item.initial,
-                        isDark = isDark,
-                        onClick = { onNavigateToUrl(item.url) }
-                    )
-                }
+        Spacer(modifier = Modifier.height(18.dp))
 
-                // '+' नया शॉर्टकट जोड़ने वाला बटन
-                item {
-                    AddDashboardItem(
-                        isDark = isDark,
-                        onClick = { showAddDialog = true }
-                    )
-                }
-            }
-        }
+        // 2. 4 नियॉन सर्कल्स (WhatsApp, YouTube, Spotify, Add new)
+        QuickNeonAppsRow(onNavigateToUrl = onNavigateToUrl)
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(18.dp))
 
-        // क्रिएटर डेस्कटॉप टूल्स सेक्शन
-        Text(
-            text = "क्रिएटर स्टूडियो (डेस्कटॉप मोड)",
-            fontSize = 15.sp,
-            fontWeight = FontWeight.Bold,
-            color = if (isDark) Color(0xFFE8EAED) else Color(0xFF202124),
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
+        // 3. 2x2 टास्क कार्ड्स
+        CreatorTaskGrid2x2(onNavigateToUrl = onNavigateToUrl)
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            CreatorStudioCard(
-                title = "YT Studio",
-                subtitle = "एनालिटिक्स व अपलोड",
-                iconText = "▶",
-                isDark = isDark,
-                modifier = Modifier.weight(1f),
-                onClick = { onNavigateToUrl("https://studio.youtube.com") }
-            )
-
-            CreatorStudioCard(
-                title = "AI Studio",
-                subtitle = "मॉडल व वर्कस्पेस",
-                iconText = "✦",
-                isDark = isDark,
-                modifier = Modifier.weight(1f),
-                onClick = { onNavigateToUrl("https://aistudio.google.com") }
-            )
-        }
+        Spacer(modifier = Modifier.height(24.dp))
     }
+}
 
-    // नया शॉर्टकट जोड़ने का डायलॉग (AlertDialog)
-    if (showAddDialog) {
-        AlertDialog(
-            onDismissRequest = { showAddDialog = false },
-            title = {
-                Text(
-                    text = "नई वेबसाइट जोड़ें",
-                    fontWeight = FontWeight.Bold
+// 1. टॉप Creator Nexus और तीनों फोल्डर (Workspace, Community, Assets)
+@Composable
+private fun CreatorNexusStatsCard() {
+    val gradientBorder = Brush.linearGradient(
+        colors = listOf(NeonPurple.copy(alpha = 0.8f), NeonCyan.copy(alpha = 0.5f), NeonPurple.copy(alpha = 0.8f))
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(26.dp))
+            .background(DarkCardBg)
+            .border(1.5.dp, gradientBorder, RoundedCornerShape(26.dp))
+            .padding(16.dp)
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = "Creator Nexus",
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+                letterSpacing = 1.2.sp
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Text(
+                text = "DAILY CREATION FLOW: 4.2 HRS",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFFFF2A85),
+                letterSpacing = 0.8.sp
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "PROJECTS ACTIVE: 3",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                color = NeonCyan,
+                letterSpacing = 0.8.sp
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "INSPIRATION BLOCKS CLEARED: 12",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                color = NeonGreen,
+                letterSpacing = 0.8.sp
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // तीन फोल्डर्स: WORKSPACE, COMMUNITY, ASSETS
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                NexusFolderBox(
+                    title = "WORKSPACE",
+                    borderColor = NeonPurple,
+                    icons = listOf("F", "N", "VS"),
+                    modifier = Modifier.weight(1f)
                 )
-            },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    OutlinedTextField(
-                        value = newTitle,
-                        onValueChange = { newTitle = it },
-                        label = { Text("वेबसाइट का नाम") },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    OutlinedTextField(
-                        value = newUrl,
-                        onValueChange = { newUrl = it },
-                        label = { Text("URL (उदा. https://...)") },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        if (newTitle.isNotBlank() && newUrl.isNotBlank()) {
-                            val cleanUrl = if (!newUrl.startsWith("http://") && !newUrl.startsWith("https://")) {
-                                "https://$newUrl"
-                            } else newUrl
-
-                            shortcuts.add(
-                                DashboardShortcut(
-                                    id = System.currentTimeMillis().toString(),
-                                    title = newTitle.trim(),
-                                    url = cleanUrl.trim()
-                                )
-                            )
-                            newTitle = ""
-                            newUrl = ""
-                            showAddDialog = false
-                        }
-                    }
-                ) {
-                    Text("जोड़ें")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showAddDialog = false }) {
-                    Text("रद्द करें")
-                }
+                NexusFolderBox(
+                    title = "COMMUNITY",
+                    borderColor = NeonCyan,
+                    icons = listOf("D", "S", "GH"),
+                    modifier = Modifier.weight(1f)
+                )
+                NexusFolderBox(
+                    title = "ASSETS",
+                    borderColor = NeonOrange,
+                    icons = listOf("▲", "📦", "◎"),
+                    modifier = Modifier.weight(1f)
+                )
             }
-        )
+        }
     }
 }
 
 @Composable
-private fun DashboardShortcutItem(
+private fun NexusFolderBox(
     title: String,
-    letter: String,
-    isDark: Boolean,
+    borderColor: Color,
+    icons: List<String>,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color(0xFF0D0B14))
+            .border(1.2.dp, borderColor.copy(alpha = 0.7f), RoundedCornerShape(16.dp))
+            .padding(vertical = 8.dp, horizontal = 4.dp)
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = title,
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = borderColor
+                )
+                Spacer(modifier = Modifier.width(2.dp))
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = null,
+                    tint = borderColor,
+                    modifier = Modifier.size(9.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                icons.forEach { iconText ->
+                    Box(
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(Color(0xFF1E1A29)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = iconText,
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+// 2. चार नियॉन राउंड शॉर्टकट्स
+@Composable
+private fun QuickNeonAppsRow(onNavigateToUrl: (String) -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(22.dp))
+            .background(DarkCardBg)
+            .border(1.2.dp, NeonCyan.copy(alpha = 0.35f), RoundedCornerShape(22.dp))
+            .padding(vertical = 12.dp, horizontal = 8.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceAround
+        ) {
+            NeonRoundApp(
+                name = "WhatsApp",
+                iconText = "💬",
+                glowColor = NeonGreen,
+                onClick = { onNavigateToUrl("https://web.whatsapp.com") }
+            )
+            NeonRoundApp(
+                name = "YouTube",
+                iconText = "▶",
+                glowColor = Color(0xFFFF0033),
+                onClick = { onNavigateToUrl("https://www.youtube.com") }
+            )
+            NeonRoundApp(
+                name = "Spotify",
+                iconText = "≈",
+                glowColor = Color(0xFF1DB954),
+                onClick = { onNavigateToUrl("https://open.spotify.com") }
+            )
+            NeonRoundApp(
+                name = "Add new",
+                iconText = "+",
+                glowColor = NeonPurple,
+                onClick = { /* Add custom shortcut */ }
+            )
+        }
+    }
+}
+
+@Composable
+private fun NeonRoundApp(
+    name: String,
+    iconText: String,
+    glowColor: Color,
     onClick: () -> Unit
 ) {
     Column(
-        modifier = Modifier
-            .clip(RoundedCornerShape(12.dp))
-            .clickable { onClick() }
-            .padding(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        modifier = Modifier.clickable { onClick() }
     ) {
         Box(
             modifier = Modifier
-                .size(50.dp)
+                .size(54.dp)
                 .clip(CircleShape)
-                .background(if (isDark) Color(0xFF2B2D31) else Color(0xFFE8EAED)),
+                .background(Color(0xFF0F0D18))
+                .border(2.dp, glowColor, CircleShape),
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = letter,
-                fontSize = 19.sp,
+                text = iconText,
+                fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
-                color = if (isDark) Color(0xFF8AB4F8) else Color(0xFF1A73E8)
+                color = glowColor
             )
         }
-
         Spacer(modifier = Modifier.height(6.dp))
-
         Text(
-            text = title,
+            text = name,
             fontSize = 11.sp,
             fontWeight = FontWeight.Medium,
-            color = if (isDark) Color(0xFFE8EAED) else Color(0xFF3C4043),
+            color = Color.White,
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            textAlign = TextAlign.Center
+            overflow = TextOverflow.Ellipsis
         )
     }
 }
 
+// 3. 2x2 टास्क और लिंक्स ग्रिड
 @Composable
-private fun AddDashboardItem(
-    isDark: Boolean,
-    onClick: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .clip(RoundedCornerShape(12.dp))
-            .clickable { onClick() }
-            .padding(4.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .size(50.dp)
-                .clip(CircleShape)
-                .background(if (isDark) Color(0xFF1E1F22) else Color(0xFFF1F3F4))
-                .border(
-                    width = 1.dp,
-                    color = if (isDark) Color(0xFF3C4043) else Color(0xFFDADCE0),
-                    shape = CircleShape
-                ),
-            contentAlignment = Alignment.Center
+private fun CreatorTaskGrid2x2(onNavigateToUrl: (String) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = "Add Website",
-                tint = if (isDark) Color(0xFF9AA0A6) else Color(0xFF5F6368),
-                modifier = Modifier.size(22.dp)
+            CyberpunkTaskCard(
+                title = "Github Repo",
+                subtitle = "Rework",
+                iconText = "⌥",
+                borderColor = NeonCyan,
+                modifier = Modifier.weight(1f),
+                onClick = { onNavigateToUrl("https://github.com/krishnakumarcodes") }
+            )
+            CyberpunkTaskCard(
+                title = "Figma",
+                subtitle = "Wireframes",
+                iconText = "❖",
+                borderColor = NeonPurple,
+                modifier = Modifier.weight(1f),
+                onClick = { onNavigateToUrl("https://www.figma.com") }
             )
         }
 
-        Spacer(modifier = Modifier.height(6.dp))
-
-        Text(
-            text = "जोड़ें",
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Medium,
-            color = if (isDark) Color(0xFF9AA0A6) else Color(0xFF5F6368),
-            textAlign = TextAlign.Center
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            CyberpunkTaskCard(
+                title = "Unsplash",
+                subtitle = "Curated Photos",
+                iconText = "◫",
+                borderColor = NeonGreen,
+                modifier = Modifier.weight(1f),
+                onClick = { onNavigateToUrl("https://unsplash.com") }
+            )
+            CyberpunkTaskCard(
+                title = "Notion Content",
+                subtitle = "Calendar",
+                iconText = "N",
+                borderColor = NeonOrange,
+                modifier = Modifier.weight(1f),
+                onClick = { onNavigateToUrl("https://www.notion.so") }
+            )
+        }
     }
 }
 
 @Composable
-private fun CreatorStudioCard(
+private fun CyberpunkTaskCard(
     title: String,
     subtitle: String,
     iconText: String,
-    isDark: Boolean,
+    borderColor: Color,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-    Card(
+    Box(
         modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
-            .clickable { onClick() },
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isDark) Color(0xFF1E1F22) else Color(0xFFFFFFFF)
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            .clip(RoundedCornerShape(18.dp))
+            .background(DarkCardBg)
+            .border(1.2.dp, borderColor.copy(alpha = 0.6f), RoundedCornerShape(18.dp))
+            .clickable { onClick() }
+            .padding(12.dp)
     ) {
         Row(
-            modifier = Modifier.padding(14.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Box(
                 modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(if (isDark) Color(0xFF2B2D31) else Color(0xFFE8EAED)),
+                    .size(38.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(Color(0xFF0F0D18))
+                    .border(1.dp, borderColor.copy(alpha = 0.5f), RoundedCornerShape(10.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = iconText,
                     fontSize = 16.sp,
-                    color = if (isDark) Color(0xFF8AB4F8) else Color(0xFF1A73E8)
+                    fontWeight = FontWeight.Bold,
+                    color = borderColor
                 )
             }
 
-            Column {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,
-                    fontSize = 13.sp,
+                    fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
-                    color = if (isDark) Color.White else Color(0xFF202124)
+                    color = Color.White,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = subtitle,
-                    fontSize = 11.sp,
-                    color = if (isDark) Color(0xFF9AA0A6) else Color(0xFF5F6368)
+                    fontSize = 10.sp,
+                    color = SubtitleGray,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
+
+            Icon(
+                imageVector = Icons.Default.Edit,
+                contentDescription = null,
+                tint = SubtitleGray,
+                modifier = Modifier.size(12.dp)
+            )
         }
     }
 }
