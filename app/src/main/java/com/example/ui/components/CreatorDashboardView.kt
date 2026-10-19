@@ -382,11 +382,12 @@ private fun CreatorNexusCard(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 toolkitSections.forEach { section ->
-                    ToolkitBox(
-                        section = section,
-                        modifier = Modifier.weight(1f),
-                        onToolClick = onToolClick
-                    )
+                    Box(modifier = Modifier.weight(1f)) {
+                        ToolkitBox(
+                            section = section,
+                            onToolClick = onToolClick
+                        )
+                    }
                 }
             }
         }
@@ -396,11 +397,11 @@ private fun CreatorNexusCard(
 @Composable
 private fun ToolkitBox(
     section: ToolkitSection,
-    modifier: Modifier = Modifier,
     onToolClick: (String) -> Unit
 ) {
     Box(
-        modifier = modifier
+        modifier = Modifier
+            .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
             .background(Color(0xFF16132D))
             .border(
@@ -561,14 +562,14 @@ private fun ProjectPillsGrid(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                ProjectPillItem(
-                    project = projects[0],
-                    cyberCardBg = cyberCardBg,
-                    cyberGradient = cyberGradient,
-                    modifier = Modifier.weight(1f),
-                    onClick = { onProjectClick(projects[0].url) }
-                )
-                ProjectPillItem(
-                    project = projects[1],
-                    cyberCardBg = cyberCardBg,
-                    cyberGradient = cyberGradie
+                Box(modifier = Modifier.weight(1f)) {
+                    ProjectPillItem(
+                        project = projects[0],
+                        cyberCardBg = cyberCardBg,
+                        cyberGradient = cyberGradient,
+                        onClick = { onProjectClick(projects[0].url) }
+                    )
+                }
+                Box(modifier = Modifier.weight(1f)) {
+                    ProjectPillItem(
+  
