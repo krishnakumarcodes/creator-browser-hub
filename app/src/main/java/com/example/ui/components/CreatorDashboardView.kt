@@ -1,313 +1,346 @@
 package com.example.ui.components
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.ui.theme.*
-import com.example.viewmodel.BrowserViewModel
 
-data class CyberAppItem(val id: String, val name: String, val url: String, val initial: String, val color: Color)
-data class CyberProjectItem(val title: String, val url: String, val initial: String, val color: Color)
-data class ToolkitItem(val initial: String, val url: String, val color: Color)
-data class ToolkitSection(val title: String, val borderColor: Color, val items: List<ToolkitItem>)
+data class DashboardShortcut(
+    val id: String,
+    val title: String,
+    val url: String,
+    val initial: String = title.take(1).uppercase()
+)
 
 @Composable
-fun CreatorDashboardView(viewModel: BrowserViewModel, modifier: Modifier = Modifier) {
-    val cyberBg = Color(0xFF08071A)
-    val cyberCardBg = Color(0xE6121026)
-    val neonPink = Color(0xFFFF2E93)
-    val neonCyan = Color(0xFF00F0FF)
-    val neonGreen = Color(0xFF10FFA0)
-    val neonAmber = Color(0xFFFFB800)
-    val neonPurple = Color(0xFF9D4EDD)
-
-    val cyberGradient = Brush.horizontalGradient(listOf(neonPurple, neonPink, neonCyan, neonGreen))
+fun CreatorDashboardView(
+    modifier: Modifier = Modifier,
+    onNavigateToUrl: (String) -> Unit = {},
+    isDark: Boolean = isSystemInDarkTheme()
+) {
+    val shortcuts = remember {
+        mutableStateListOf(
+            DashboardShortcut("1", "Google", "https://www.google.com"),
+            DashboardShortcut("2", "YouTube", "https://www.youtube.com"),
+            DashboardShortcut("3", "Studio", "https://studio.youtube.com"),
+            DashboardShortcut("4", "GitHub", "https://www.github.com"),
+            DashboardShortcut("5", "ChatGPT", "https://chatgpt.com"),
+            DashboardShortcut("6", "Wikipedia", "https://www.wikipedia.org"),
+            DashboardShortcut("7", "Canva", "https://www.canva.com")
+        )
+    }
 
     var showAddDialog by remember { mutableStateOf(false) }
-    var newName by remember { mutableStateOf("") }
+    var newTitle by remember { mutableStateOf("") }
     var newUrl by remember { mutableStateOf("") }
 
-    var favoriteApps by remember {
-        mutableStateOf(
-            listOf(
-                CyberAppItem("whatsapp", "WhatsApp", "https://web.whatsapp.com", "W", Color(0xFF25D366)),
-                CyberAppItem("youtube", "YouTube", "https://www.youtube.com", "Y", Color(0xFFFF0000)),
-                CyberAppItem("spotify", "Spotify", "https://open.spotify.com", "S", Color(0xFF1DB954))
+    val scrollState = rememberScrollState()
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(if (isDark) Color(0xFF121212) else Color(0xFFF8F9FA))
+            .verticalScroll(scrollState)
+            .padding(horizontal = 16.dp, vertical = 12.dp)
+    ) {
+        Text(
+            text = "पसंदीदा वेबसाइट्स (4x4 ग्रिड)",
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+            color = if (isDark) Color(0xFFE8EAED) else Color(0xFF202124),
+            modifier = Modifier.padding(bottom = 12.dp)
+        )
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = if (isDark) Color(0xFF1E1F22) else Color(0xFFFFFFFF)
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        ) {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(4),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 600.dp)
+                    .padding(14.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                userScrollEnabled = false
+            ) {
+                items(shortcuts, key = { it.id }) { item ->
+                    DashboardShortcutItem(
+                        title = item.title,
+                        letter = item.initial,
+                        isDark = isDark,
+                        onClick = { onNavigateToUrl(item.url) }
+                    )
+                }
+
+                item {
+                    AddDashboardItem(
+                        isDark = isDark,
+                        onClick = { showAddDialog = true }
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Text(
+            text = "क्रिएटर स्टूडियो (डेस्कटॉप मोड)",
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+            color = if (isDark) Color(0xFFE8EAED) else Color(0xFF202124),
+            modifier = Modifier.padding(bottom = 12.dp)
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            CreatorStudioCard(
+                title = "YT Studio",
+                subtitle = "एनालिटिक्स व अपलोड",
+                iconText = "▶",
+                isDark = isDark,
+                modifier = Modifier.weight(1f),
+                onClick = { onNavigateToUrl("https://studio.youtube.com") }
             )
-        )
-    }
 
-    val toolkitSections = remember {
-        listOf(
-            ToolkitSection("WORKSPACE ✏️ ▾", neonPink, listOf(
-                ToolkitItem("F", "https://www.figma.com", Color(0xFFA259FF)),
-                ToolkitItem("N", "https://www.notion.so", Color(0xFF000000)),
-                ToolkitItem("V", "https://vscode.dev", Color(0xFF007ACC))
-            )),
-            ToolkitSection("COMMUNITY ✏️ ▾", neonCyan, listOf(
-                ToolkitItem("D", "https://discord.com", Color(0xFF5865F2)),
-                ToolkitItem("S", "https://slack.com", Color(0xFFE01E5A)),
-                ToolkitItem("G", "https://github.com", Color(0xFF24292E))
-            )),
-            ToolkitSection("ASSETS ✏️ ▾", neonAmber, listOf(
-                ToolkitItem("D", "https://drive.google.com", Color(0xFF0F9D58)),
-                ToolkitItem("B", "https://www.dropbox.com", Color(0xFF0061FF)),
-                ToolkitItem("C", "https://chrome.google.com", Color(0xFFEA4335))
-            ))
-        )
-    }
-
-    val projectPills = remember {
-        listOf(
-            CyberProjectItem("Github Repo Rework", "https://github.com", "G", Color(0xFF24292E)),
-            CyberProjectItem("Figma Wireframes", "https://www.figma.com", "F", Color(0xFFA259FF)),
-            CyberProjectItem("Unsplash Curated Photos", "https://unsplash.com", "U", Color(0xFF111111)),
-            CyberProjectItem("Notion Content Calendar", "https://www.notion.so", "N", Color(0xFF000000))
-        )
+            CreatorStudioCard(
+                title = "AI Studio",
+                subtitle = "मॉडल व वर्कस्पेस",
+                iconText = "✦",
+                isDark = isDark,
+                modifier = Modifier.weight(1f),
+                onClick = { onNavigateToUrl("https://aistudio.google.com") }
+            )
+        }
     }
 
     if (showAddDialog) {
         AlertDialog(
             onDismissRequest = { showAddDialog = false },
-            containerColor = DarkSurfaceElevated,
-            title = { Text("नया शॉर्टकट जोड़ें", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 16.sp) },
+            title = {
+                Text(
+                    text = "नई वेबसाइट जोड़ें",
+                    fontWeight = FontWeight.Bold
+                )
+            },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    OutlinedTextField(value = newName, onValueChange = { newName = it }, label = { Text("नाम") }, singleLine = true)
-                    OutlinedTextField(value = newUrl, onValueChange = { newUrl = it }, label = { Text("URL") }, singleLine = true)
+                    OutlinedTextField(
+                        value = newTitle,
+                        onValueChange = { newTitle = it },
+                        label = { Text("वेबसाइट का नाम") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    OutlinedTextField(
+                        value = newUrl,
+                        onValueChange = { newUrl = it },
+                        label = { Text("URL (उदा. https://...)") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             },
             confirmButton = {
-                Button(
+                TextButton(
                     onClick = {
-                        if (newName.isNotBlank() && newUrl.isNotBlank()) {
-                            val cleanUrl = if (newUrl.startsWith("http")) newUrl.trim() else "https://${newUrl.trim()}"
-                            val newItem = CyberAppItem("c_${System.currentTimeMillis()}", newName.trim(), cleanUrl, newName.trim().take(1).uppercase(), neonCyan)
-                            favoriteApps = favoriteApps + newItem
-                            newName = ""
+                        if (newTitle.isNotBlank() && newUrl.isNotBlank()) {
+                            val cleanUrl = if (!newUrl.startsWith("http://") && !newUrl.startsWith("https://")) {
+                                "https://$newUrl"
+                            } else newUrl
+
+                            shortcuts.add(
+                                DashboardShortcut(
+                                    id = System.currentTimeMillis().toString(),
+                                    title = newTitle.trim(),
+                                    url = cleanUrl.trim()
+                                )
+                            )
+                            newTitle = ""
                             newUrl = ""
                             showAddDialog = false
-                            viewModel.showMessage("${newItem.name} होम स्क्रीन पर जुड़ गया!")
                         }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = neonPurple)
-                ) { Text("जोड़ें", color = Color.White) }
+                    }
+                ) {
+                    Text("जोड़ें")
+                }
             },
             dismissButton = {
-                TextButton(onClick = { showAddDialog = false }) { Text("रद्द करें", color = TextSecondary) }
+                TextButton(onClick = { showAddDialog = false }) {
+                    Text("रद्द करें")
+                }
             }
         )
     }
+}
 
-    LazyColumn(
-        modifier = modifier.fillMaxSize().background(cyberBg).padding(horizontal = 16.dp),
-        contentPadding = PaddingValues(top = 12.dp, bottom = 32.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+@Composable
+private fun DashboardShortcutItem(
+    title: String,
+    letter: String,
+    isDark: Boolean,
+    onClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .clip(RoundedCornerShape(12.dp))
+            .clickable { onClick() }
+            .padding(4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        // 1. Search Bar
-        item {
+        Box(
+            modifier = Modifier
+                .size(50.dp)
+                .clip(CircleShape)
+                .background(if (isDark) Color(0xFF2B2D31) else Color(0xFFE8EAED)),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = letter,
+                fontSize = 19.sp,
+                fontWeight = FontWeight.Bold,
+                color = if (isDark) Color(0xFF8AB4F8) else Color(0xFF1A73E8)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(6.dp))
+
+        Text(
+            text = title,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Medium,
+            color = if (isDark) Color(0xFFE8EAED) else Color(0xFF3C4043),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+private fun AddDashboardItem(
+    isDark: Boolean,
+    onClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .clip(RoundedCornerShape(12.dp))
+            .clickable { onClick() }
+            .padding(4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .size(50.dp)
+                .clip(CircleShape)
+                .background(if (isDark) Color(0xFF1E1F22) else Color(0xFFF1F3F4))
+                .border(
+                    width = 1.dp,
+                    color = if (isDark) Color(0xFF3C4043) else Color(0xFFDADCE0),
+                    shape = CircleShape
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Add,
+                contentDescription = "Add Website",
+                tint = if (isDark) Color(0xFF9AA0A6) else Color(0xFF5F6368),
+                modifier = Modifier.size(22.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(6.dp))
+
+        Text(
+            text = "जोड़ें",
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Medium,
+            color = if (isDark) Color(0xFF9AA0A6) else Color(0xFF5F6368),
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+private fun CreatorStudioCard(
+    title: String,
+    subtitle: String,
+    iconText: String,
+    isDark: Boolean,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .clickable { onClick() },
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isDark) Color(0xFF1E1F22) else Color(0xFFFFFFFF)
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
             Box(
-                modifier = Modifier.fillMaxWidth().height(54.dp).clip(RoundedCornerShape(27.dp))
-                    .background(cyberCardBg).border(BorderStroke(1.5.dp, cyberGradient), RoundedCornerShape(27.dp)).padding(horizontal = 16.dp),
-                contentAlignment = Alignment.CenterStart
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(if (isDark) Color(0xFF2B2D31) else Color(0xFFE8EAED)),
+                contentAlignment = Alignment.Center
             ) {
-                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Box(modifier = Modifier.clip(RoundedCornerShape(12.dp)).clickable { viewModel.loadUrl("https://www.google.com") }.padding(4.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(modifier = Modifier.size(24.dp).clip(CircleShape).background(Color(0xFF4285F4)), contentAlignment = Alignment.Center) {
-                                Text("G", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                            }
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = TextSecondary, modifier = Modifier.size(18.dp))
-                        }
-                    }
-                    Text("Search Web...", color = Color(0xFF7A789E), fontSize = 15.sp, modifier = Modifier.weight(1f).clickable { viewModel.loadUrl("https://www.google.com") })
-                    IconButton(onClick = { viewModel.showMessage("वॉइस सर्च सक्रिय है") }, modifier = Modifier.size(36.dp)) {
-                        Icon(Icons.Default.Mic, contentDescription = null, tint = TextPrimary, modifier = Modifier.size(22.dp))
-                    }
-                }
+                Text(
+                    text = iconText,
+                    fontSize = 16.sp,
+                    color = if (isDark) Color(0xFF8AB4F8) else Color(0xFF1A73E8)
+                )
             }
-        }
 
-        // 2. Creator Nexus Card
-        item {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = cyberCardBg),
-                border = BorderStroke(1.5.dp, cyberGradient)
-            ) {
-                Column(modifier = Modifier.padding(18.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text("Creator Nexus", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.2.sp)
-                    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text("DAILY CREATION FLOW: 4.2 HRS", color = neonPink, fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp)
-                        Text("PROJECTS ACTIVE: 3", color = neonCyan, fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp)
-                        Text("INSPIRATION BLOCKS CLEARED: 12", color = neonGreen, fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp)
-                    }
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        toolkitSections.forEach { sec ->
-                            Box(
-                                modifier = Modifier.weight(1f).clip(RoundedCornerShape(14.dp)).background(Color(0xFF16132D))
-                                    .border(BorderStroke(1.dp, sec.borderColor.copy(alpha = 0.8f)), RoundedCornerShape(14.dp)).padding(horizontal = 6.dp, vertical = 8.dp)
-                            ) {
-                                Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                    Text(sec.title, color = sec.borderColor, fontSize = 9.sp, fontWeight = FontWeight.ExtraBold)
-                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
-                                        sec.items.forEach { t ->
-                                            Box(modifier = Modifier.size(24.dp).clip(RoundedCornerShape(6.dp)).background(t.color).clickable { viewModel.loadUrl(t.url) }, contentAlignment = Alignment.Center) {
-                                                Text(t.initial, color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // 3. Quick Action Apps (Step 3: Brand Logo & Glow Ring)
-        item {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(22.dp),
-                colors = CardDefaults.cardColors(containerColor = cyberCardBg),
-                border = BorderStroke(1.2.dp, cyberGradient)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp, horizontal = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceAround,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    favoriteApps.take(3).forEach { app ->
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(6.dp),
-                            modifier = Modifier.clip(RoundedCornerShape(12.dp)).clickable { viewModel.loadUrl(app.url) }.padding(4.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier.size(54.dp).clip(CircleShape).background(Color(0xFF16132D))
-                                    .border(BorderStroke(2.dp, app.color), CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                if (app.id == "youtube") {
-                                    Box(
-                                        modifier = Modifier.size(28.dp, 20.dp).clip(RoundedCornerShape(5.dp)).background(Color(0xFFFF0000)),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Icon(Icons.Default.PlayArrow, contentDescription = null, tint = Color.White, modifier = Modifier.size(15.dp))
-                                    }
-                                } else if (app.id == "spotify") {
-                                    Box(
-                                        modifier = Modifier.size(28.dp).clip(CircleShape).background(Color(0xFF1DB954)),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Icon(Icons.Default.MusicNote, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
-                                    }
-                                } else {
-                                    Text(app.initial, color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
-                                }
-                            }
-                            Text(app.name, color = TextPrimary, fontSize = 11.sp, fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        }
-                    }
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(6.dp),
-                        modifier = Modifier.clip(RoundedCornerShape(12.dp)).clickable { showAddDialog = true }.padding(4.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier.size(54.dp).clip(CircleShape).background(Color(0xFF1E1736))
-                                .border(BorderStroke(1.5.dp, neonPurple), CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(Icons.Default.Add, contentDescription = "Add new", tint = neonPink, modifier = Modifier.size(28.dp))
-                        }
-                        Text("Add new", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Medium)
-                    }
-                }
-            }
-        }
-
-        // 4. Project Pills (2x2 Grid with Edit pencil)
-        item {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Box(
-                        modifier = Modifier.weight(1f).height(52.dp).clip(RoundedCornerShape(20.dp)).background(cyberCardBg)
-                            .border(BorderStroke(1.2.dp, cyberGradient), RoundedCornerShape(20.dp)).clickable { viewModel.loadUrl(projectPills[0].url) }.padding(horizontal = 10.dp),
-                        contentAlignment = Alignment.CenterStart
-                    ) {
-                        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Box(modifier = Modifier.size(28.dp).clip(CircleShape).background(projectPills[0].color), contentAlignment = Alignment.Center) {
-                                Text(projectPills[0].initial, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                            }
-                            Text(projectPills[0].title, color = TextPrimary, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
-                            Text("✏️", fontSize = 11.sp)
-                        }
-                    }
-                    Box(
-                        modifier = Modifier.weight(1f).height(52.dp).clip(RoundedCornerShape(20.dp)).background(cyberCardBg)
-                            .border(BorderStroke(1.2.dp, cyberGradient), RoundedCornerShape(20.dp)).clickable { viewModel.loadUrl(projectPills[1].url) }.padding(horizontal = 10.dp),
-                        contentAlignment = Alignment.CenterStart
-                    ) {
-                        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Box(modifier = Modifier.size(28.dp).clip(CircleShape).background(projectPills[1].color), contentAlignment = Alignment.Center) {
-                                Text(projectPills[1].initial, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                            }
-                            Text(projectPills[1].title, color = TextPrimary, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
-                            Text("✏️", fontSize = 11.sp)
-                        }
-                    }
-                }
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Box(
-                        modifier = Modifier.weight(1f).height(52.dp).clip(RoundedCornerShape(20.dp)).background(cyberCardBg)
-                            .border(BorderStroke(1.2.dp, cyberGradient), RoundedCornerShape(20.dp)).clickable { viewModel.loadUrl(projectPills[2].url) }.padding(horizontal = 10.dp),
-                        contentAlignment = Alignment.CenterStart
-                    ) {
-                        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Box(modifier = Modifier.size(28.dp).clip(CircleShape).background(projectPills[2].color), contentAlignment = Alignment.Center) {
-                                Text(projectPills[2].initial, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                            }
-                            Text(projectPills[2].title, color = TextPrimary, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
-                            Text("✏️", fontSize = 11.sp)
-                        }
-                    }
-                    Box(
-                        modifier = Modifier.weight(1f).height(52.dp).clip(RoundedCornerShape(20.dp)).background(cyberCardBg)
-                            .border(BorderStroke(1.2.dp, cyberGradient), RoundedCornerShape(20.dp)).clickable { viewModel.loadUrl(projectPills[3].url) }.padding(horizontal = 10.dp),
-                        contentAlignment = Alignment.CenterStart
-                    ) {
-                        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Box(modifier = Modifier.size(28.dp).clip(CircleShape).background(projectPills[3].color), contentAlignment = Alignment.Center) {
-                                Text(projectPills[3].initial, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                            }
-                            Text(projectPills[3].title, color = TextPrimary, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
-                            Text("✏️", fontSize = 11.sp)
-                        }
-                    }
-                }
+            Column {
+                Text(
+                    text = title,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = if (isDark) Color.White else Color(0xFF202124)
+                )
+                Text(
+                    text = subtitle,
+                    fontSize = 11.sp,
+                    color = if (isDark) Color(0xFF9AA0A6) else Color(0xFF5F6368)
+                )
             }
         }
     }
