@@ -195,186 +195,238 @@ fun CreatorDashboardView(
         contentPadding = PaddingValues(top = 12.dp, bottom = 32.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // 1. Top Search Bar
         item {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(54.dp)
-                    .clip(RoundedCornerShape(27.dp))
-                    .background(cyberCardBg)
-                    .border(
-                        border = BorderStroke(1.5.dp, cyberGradient),
-                        shape = RoundedCornerShape(27.dp)
-                    )
-                    .padding(horizontal = 16.dp),
-                contentAlignment = Alignment.CenterStart
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .clickable { viewModel.loadUrl("https://www.google.com") }
-                            .padding(4.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(
-                                modifier = Modifier
-                                    .size(24.dp)
-                                    .clip(CircleShape)
-                                    .background(Color(0xFF4285F4)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = "G",
-                                    color = Color.White,
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Icon(
-                                imageVector = Icons.Default.ArrowDropDown,
-                                contentDescription = null,
-                                tint = TextSecondary,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
-                    }
-
-                    Text(
-                        text = "Search Web...",
-                        color = Color(0xFF7A789E),
-                        fontSize = 15.sp,
-                        modifier = Modifier
-                            .weight(1f)
-                            .clickable { viewModel.loadUrl("https://www.google.com") }
-                    )
-
-                    IconButton(
-                        onClick = { viewModel.showMessage("वॉइस सर्च सक्रिय है") },
-                        modifier = Modifier.size(36.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Mic,
-                            contentDescription = null,
-                            tint = TextPrimary,
-                            modifier = Modifier.size(22.dp)
-                        )
-                    }
-                }
-            }
+            CreatorSearchBar(
+                cyberCardBg = cyberCardBg,
+                cyberGradient = cyberGradient,
+                onSearchClick = { viewModel.loadUrl("https://www.google.com") },
+                onVoiceClick = { viewModel.showMessage("वॉइस सर्च सक्रिय है") }
+            )
         }
 
-        // 2. Main Creator Nexus Card
         item {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = cyberCardBg),
-                border = BorderStroke(1.5.dp, cyberGradient)
-            ) {
-                Column(
-                    modifier = Modifier.padding(18.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Text(
-                        text = "Creator Nexus",
-                        color = Color.White,
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.2.sp
-                    )
+            CreatorNexusCard(
+                cyberCardBg = cyberCardBg,
+                cyberGradient = cyberGradient,
+                neonPink = neonPink,
+                neonCyan = neonCyan,
+                neonGreen = neonGreen,
+                toolkitSections = toolkitSections,
+                onToolClick = { url -> viewModel.loadUrl(url) }
+            )
+        }
 
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
+        item {
+            QuickAppsCard(
+                cyberCardBg = cyberCardBg,
+                cyberGradient = cyberGradient,
+                neonPurple = neonPurple,
+                neonPink = neonPink,
+                apps = favoriteApps.take(3),
+                onAppClick = { url -> viewModel.loadUrl(url) },
+                onAddClick = { showAddDialog = true }
+            )
+        }
+
+        item {
+            ProjectPillsGrid(
+                cyberCardBg = cyberCardBg,
+                cyberGradient = cyberGradient,
+                projects = projectPills,
+                onProjectClick = { url -> viewModel.loadUrl(url) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun CreatorSearchBar(
+    cyberCardBg: Color,
+    cyberGradient: Brush,
+    onSearchClick: () -> Unit,
+    onVoiceClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(54.dp)
+            .clip(RoundedCornerShape(27.dp))
+            .background(cyberCardBg)
+            .border(
+                border = BorderStroke(1.5.dp, cyberGradient),
+                shape = RoundedCornerShape(27.dp)
+            )
+            .padding(horizontal = 16.dp),
+        contentAlignment = Alignment.CenterStart
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .clickable { onSearchClick() }
+                    .padding(4.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFF4285F4)),
+                        contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "DAILY CREATION FLOW: 4.2 HRS",
-                            color = neonPink,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 0.8.sp
-                        )
-                        Text(
-                            text = "PROJECTS ACTIVE: 3",
-                            color = neonCyan,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 0.8.sp
-                        )
-                        Text(
-                            text = "INSPIRATION BLOCKS CLEARED: 12",
-                            color = neonGreen,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 0.8.sp
+                            text = "G",
+                            color = Color.White,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold
                         )
                     }
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(
+                        imageVector = Icons.Default.ArrowDropDown,
+                        contentDescription = null,
+                        tint = TextSecondary,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            }
 
-                    Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Search Web...",
+                color = Color(0xFF7A789E),
+                fontSize = 15.sp,
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable { onSearchClick() }
+            )
 
-                    // 3 Category Boxes: WORKSPACE, COMMUNITY, ASSETS
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+            IconButton(
+                onClick = onVoiceClick,
+                modifier = Modifier.size(36.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Mic,
+                    contentDescription = null,
+                    tint = TextPrimary,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun CreatorNexusCard(
+    cyberCardBg: Color,
+    cyberGradient: Brush,
+    neonPink: Color,
+    neonCyan: Color,
+    neonGreen: Color,
+    toolkitSections: List<ToolkitSection>,
+    onToolClick: (String) -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = cyberCardBg),
+        border = BorderStroke(1.5.dp, cyberGradient)
+    ) {
+        Column(
+            modifier = Modifier.padding(18.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = "Creator Nexus",
+                color = Color.White,
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.2.sp
+            )
+
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = "DAILY CREATION FLOW: 4.2 HRS",
+                    color = neonPink,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.8.sp
+                )
+                Text(
+                    text = "PROJECTS ACTIVE: 3",
+                    color = neonCyan,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.8.sp
+                )
+                Text(
+                    text = "INSPIRATION BLOCKS CLEARED: 12",
+                    color = neonGreen,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.8.sp
+                )
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                toolkitSections.forEach { section ->
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(Color(0xFF16132D))
+                            .border(
+                                border = BorderStroke(
+                                    width = 1.dp,
+                                    color = section.borderColor.copy(alpha = 0.8f)
+                                ),
+                                shape = RoundedCornerShape(14.dp)
+                            )
+                            .padding(horizontal = 6.dp, vertical = 8.dp)
                     ) {
-                        toolkitSections.forEach { section ->
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .clip(RoundedCornerShape(14.dp))
-                                    .background(Color(0xFF16132D))
-                                    .border(
-                                        border = BorderStroke(
-                                            width = 1.dp,
-                                            color = section.borderColor.copy(alpha = 0.8f)
-                                        ),
-                                        shape = RoundedCornerShape(14.dp)
-                                    )
-                                    .padding(horizontal = 6.dp, vertical = 8.dp)
-                            ) {
-                                Column(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                                ) {
-                                    Text(
-                                        text = section.title,
-                                        color = section.borderColor,
-                                        fontSize = 9.sp,
-                                        fontWeight = FontWeight.ExtraBold
-                                    )
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Text(
+                                text = section.title,
+                                color = section.borderColor,
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.ExtraBold
+                            )
 
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceAround
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceAround
+                            ) {
+                                section.items.forEach { tool ->
+                                    Box(
+                                        modifier = Modifier
+                                            .size(24.dp)
+                                            .clip(RoundedCornerShape(6.dp))
+                                            .background(tool.color)
+                                            .clickable { onToolClick(tool.url) },
+                                        contentAlignment = Alignment.Center
                                     ) {
-                                        section.items.forEach { tool ->
-                                            Box(
-                                                modifier = Modifier
-                                                    .size(24.dp)
-                                                    .clip(RoundedCornerShape(6.dp))
-                                                    .background(tool.color)
-                                                    .clickable {
-                                                        viewModel.loadUrl(tool.url)
-                                                    },
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                Text(
-                                                    text = tool.initial,
-                                                    color = Color.White,
-                                                    fontSize = 11.sp,
-                                                    fontWeight = FontWeight.Bold
-                                                )
-                                            }
-                                        }
+                                        Text(
+                                            text = tool.initial,
+                                            color = Color.White,
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
                                     }
                                 }
                             }
@@ -383,88 +435,118 @@ fun CreatorDashboardView(
                 }
             }
         }
+    }
+}
 
-        // 3. Quick Action Apps (WhatsApp, YouTube, Spotify, Add new)
-        item {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(22.dp),
-                colors = CardDefaults.cardColors(containerColor = cyberCardBg),
-                border = BorderStroke(1.2.dp, cyberGradient)
-            ) {
-                Row(
+@Composable
+private fun QuickAppsCard(
+    cyberCardBg: Color,
+    cyberGradient: Brush,
+    neonPurple: Color,
+    neonPink: Color,
+    apps: List<CyberAppItem>,
+    onAppClick: (String) -> Unit,
+    onAddClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(containerColor = cyberCardBg),
+        border = BorderStroke(1.2.dp, cyberGradient)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp, horizontal = 8.dp),
+            horizontalArrangement = Arrangement.SpaceAround,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            apps.forEach { app ->
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 16.dp, horizontal = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceAround,
-                    verticalAlignment = Alignment.CenterVertically
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable { onAppClick(app.url) }
+                        .padding(4.dp)
                 ) {
-                    favoriteApps.take(3).forEach { app ->
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(6.dp),
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(12.dp))
-                                .clickable { viewModel.loadUrl(app.url) }
-                                .padding(4.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(54.dp)
-                                    .clip(CircleShape)
-                                    .background(Color(0xFF16132D))
-                                    .border(
-                                        border = BorderStroke(1.8.dp, app.color),
-                                        shape = CircleShape
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = app.initial,
-                                    color = Color.White,
-                                    fontSize = 20.sp,
-                                    fontWeight = FontWeight.ExtraBold
-                                )
-                            }
-                            Text(
-                                text = app.name,
-                                color = TextPrimary,
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Medium,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                    }
-
-                    // Add Button
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                    Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .clickable { showAddDialog = true }
-                            .padding(4.dp)
+                            .size(54.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFF16132D))
+                            .border(
+                                border = BorderStroke(1.8.dp, app.color),
+                                shape = CircleShape
+                            ),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(54.dp)
-                                .clip(CircleShape)
-                                .background(Color(0xFF1E1736))
-                                .border(
-                                    border = BorderStroke(1.5.dp, neonPurple),
-                                    shape = CircleShape
-                                ),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = "Add new",
-                                tint = neonPink,
-                                modifier = Modifier.size(28.dp)
-                            )
-                        }
                         Text(
-                            text = "Add new",
-                            color = TextSecondary,
-                            fontSiz
+                            text = app.initial,
+                            color = Color.White,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.ExtraBold
+                        )
+                    }
+                    Text(
+                        text = app.name,
+                        color = TextPrimary,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .clickable { onAddClick() }
+                    .padding(4.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(54.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFF1E1736))
+                        .border(
+                            border = BorderStroke(1.5.dp, neonPurple),
+                            shape = CircleShape
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Add new",
+                        tint = neonPink,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
+                Text(
+                    text = "Add new",
+                    color = TextSecondary,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ProjectPillsGrid(
+    cyberCardBg: Color,
+    cyberGradient: Brush,
+    projects: List<CyberProjectItem>,
+    onProjectClick: (String) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        projects.chunked(2).forEach { rowPills ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                
