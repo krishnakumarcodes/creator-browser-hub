@@ -384,6 +384,7 @@ private fun CreatorNexusCard(
                 toolkitSections.forEach { section ->
                     ToolkitBox(
                         section = section,
+                        modifier = Modifier.weight(1f),
                         onToolClick = onToolClick
                     )
                 }
@@ -393,13 +394,13 @@ private fun CreatorNexusCard(
 }
 
 @Composable
-private fun RowScope.ToolkitBox(
+private fun ToolkitBox(
     section: ToolkitSection,
+    modifier: Modifier = Modifier,
     onToolClick: (String) -> Unit
 ) {
     Box(
-        modifier = Modifier
-            .weight(1f)
+        modifier = modifier
             .clip(RoundedCornerShape(14.dp))
             .background(Color(0xFF16132D))
             .border(
@@ -554,25 +555,20 @@ private fun ProjectPillsGrid(
     projects: List<CyberProjectItem>,
     onProjectClick: (String) -> Unit
 ) {
-    if (projects.size < 4) return
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            ProjectPillItem(
-                project = projects[0],
-                cyberCardBg = cyberCardBg,
-                cyberGradient = cyberGradient,
-                onClick = { onProjectClick(projects[0].url) }
-            )
-            ProjectPillItem(
-                project = projects[1],
-                cyberCardBg = cyberCardBg,
-                cyberGradient = cyberGradient,
-                onClick = { onProjectClick(projects[1].url) }
-            )
-        }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            hor
+    if (projects.size >= 4) {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                ProjectPillItem(
+                    project = projects[0],
+                    cyberCardBg = cyberCardBg,
+                    cyberGradient = cyberGradient,
+                    modifier = Modifier.weight(1f),
+                    onClick = { onProjectClick(projects[0].url) }
+                )
+                ProjectPillItem(
+                    project = projects[1],
+                    cyberCardBg = cyberCardBg,
+                    cyberGradient = cyberGradie
