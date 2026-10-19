@@ -382,55 +382,66 @@ private fun CreatorNexusCard(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 toolkitSections.forEach { section ->
+                    ToolkitBox(
+                        section = section,
+                        onToolClick = onToolClick
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun RowScope.ToolkitBox(
+    section: ToolkitSection,
+    onToolClick: (String) -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .weight(1f)
+            .clip(RoundedCornerShape(14.dp))
+            .background(Color(0xFF16132D))
+            .border(
+                border = BorderStroke(
+                    width = 1.dp,
+                    color = section.borderColor.copy(alpha = 0.8f)
+                ),
+                shape = RoundedCornerShape(14.dp)
+            )
+            .padding(horizontal = 6.dp, vertical = 8.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Text(
+                text = section.title,
+                color = section.borderColor,
+                fontSize = 9.sp,
+                fontWeight = FontWeight.ExtraBold
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceAround
+            ) {
+                section.items.forEach { tool ->
                     Box(
                         modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(Color(0xFF16132D))
-                            .border(
-                                border = BorderStroke(
-                                    width = 1.dp,
-                                    color = section.borderColor.copy(alpha = 0.8f)
-                                ),
-                                shape = RoundedCornerShape(14.dp)
-                            )
-                            .padding(horizontal = 6.dp, vertical = 8.dp)
+                            .size(24.dp)
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(tool.color)
+                            .clickable { onToolClick(tool.url) },
+                        contentAlignment = Alignment.Center
                     ) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Text(
-                                text = section.title,
-                                color = section.borderColor,
-                                fontSize = 9.sp,
-                                fontWeight = FontWeight.ExtraBold
-                            )
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceAround
-                            ) {
-                                section.items.forEach { tool ->
-                                    Box(
-                                        modifier = Modifier
-                                            .size(24.dp)
-                                            .clip(RoundedCornerShape(6.dp))
-                                            .background(tool.color)
-                                            .clickable { onToolClick(tool.url) },
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text = tool.initial,
-                                            color = Color.White,
-                                            fontSize = 11.sp,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                    }
-                                }
-                            }
-                        }
+                        Text(
+                            text = tool.initial,
+                            color = Color.White,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
             }
@@ -543,10 +554,25 @@ private fun ProjectPillsGrid(
     projects: List<CyberProjectItem>,
     onProjectClick: (String) -> Unit
 ) {
+    if (projects.size < 4) return
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        projects.chunked(2).forEach { rowPills ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            ProjectPillItem(
+                project = projects[0],
+                cyberCardBg = cyberCardBg,
+                cyberGradient = cyberGradient,
+                onClick = { onProjectClick(projects[0].url) }
+            )
+            ProjectPillItem(
+                project = projects[1],
+                cyberCardBg = cyberCardBg,
+                cyberGradient = cyberGradient,
+                onClick = { onProjectClick(projects[1].url) }
+            )
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            hor
