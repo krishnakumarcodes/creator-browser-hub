@@ -75,27 +75,9 @@ fun CreatorDashboardView(
     var favoriteApps by remember {
         mutableStateOf(
             listOf(
-                CyberAppItem(
-                    id = "whatsapp",
-                    name = "WhatsApp",
-                    url = "https://web.whatsapp.com",
-                    initial = "W",
-                    color = Color(0xFF25D366)
-                ),
-                CyberAppItem(
-                    id = "youtube",
-                    name = "YouTube",
-                    url = "https://www.youtube.com",
-                    initial = "Y",
-                    color = Color(0xFFFF0000)
-                ),
-                CyberAppItem(
-                    id = "spotify",
-                    name = "Spotify",
-                    url = "https://open.spotify.com",
-                    initial = "S",
-                    color = Color(0xFF1DB954)
-                )
+                CyberAppItem("whatsapp", "WhatsApp", "https://web.whatsapp.com", "W", Color(0xFF25D366)),
+                CyberAppItem("youtube", "YouTube", "https://www.youtube.com", "Y", Color(0xFFFF0000)),
+                CyberAppItem("spotify", "Spotify", "https://open.spotify.com", "S", Color(0xFF1DB954))
             )
         )
     }
@@ -134,30 +116,10 @@ fun CreatorDashboardView(
 
     val projectPills = remember {
         listOf(
-            CyberProjectItem(
-                title = "Github Repo Rework",
-                url = "https://github.com",
-                initial = "G",
-                color = Color(0xFF24292E)
-            ),
-            CyberProjectItem(
-                title = "Figma Wireframes",
-                url = "https://www.figma.com",
-                initial = "F",
-                color = Color(0xFFA259FF)
-            ),
-            CyberProjectItem(
-                title = "Unsplash Curated Photos",
-                url = "https://unsplash.com",
-                initial = "U",
-                color = Color(0xFF111111)
-            ),
-            CyberProjectItem(
-                title = "Notion Content Calendar",
-                url = "https://www.notion.so",
-                initial = "N",
-                color = Color(0xFF000000)
-            )
+            CyberProjectItem("Github Repo Rework", "https://github.com", "G", Color(0xFF24292E)),
+            CyberProjectItem("Figma Wireframes", "https://www.figma.com", "F", Color(0xFFA259FF)),
+            CyberProjectItem("Unsplash Curated Photos", "https://unsplash.com", "U", Color(0xFF111111)),
+            CyberProjectItem("Notion Content Calendar", "https://www.notion.so", "N", Color(0xFF000000))
         )
     }
 
@@ -487,4 +449,22 @@ fun CreatorDashboardView(
                         Box(
                             modifier = Modifier
                                 .size(54.dp)
-         
+                                .clip(CircleShape)
+                                .background(Color(0xFF1E1736))
+                                .border(
+                                    border = BorderStroke(1.5.dp, neonPurple),
+                                    shape = CircleShape
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Add new",
+                                tint = neonPink,
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
+                        Text(
+                            text = "Add new",
+                            color = TextSecondary,
+                            fontSiz
