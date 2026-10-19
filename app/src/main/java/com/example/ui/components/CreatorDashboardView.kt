@@ -471,6 +471,6 @@ fun CreatorDashboardView(
             }
         }
 
-        // 4. Project Pills (2x2 Grid)
+        // 4. Project Pills (Inlined 2x2 Grid)
         item {
-            Column(verticalArrangement = Arr
+            Column(verticalArrangeme
