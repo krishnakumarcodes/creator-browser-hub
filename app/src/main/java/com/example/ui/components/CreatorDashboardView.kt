@@ -170,7 +170,11 @@ fun CreatorDashboardView(viewModel: BrowserViewModel, modifier: Modifier = Modif
                                     .border(BorderStroke(1.dp, sec.borderColor.copy(alpha = 0.8f)), RoundedCornerShape(14.dp)).padding(horizontal = 6.dp, vertical = 8.dp)
                             ) {
                                 Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                    Text(sec.title, color = sec.borderColor, fontSize = 9.sp, fontWeight = FontWeight.ExtraBold)
+                                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                                        Text(sec.title, color = sec.borderColor, fontSize = 9.sp, fontWeight = FontWeight.ExtraBold)
+                                        Icon(Icons.Default.Edit, contentDescription = null, tint = sec.borderColor.copy(alpha = 0.7f), modifier = Modifier.size(9.dp))
+                                        Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = sec.borderColor.copy(alpha = 0.7f), modifier = Modifier.size(11.dp))
+                                    }
                                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
                                         sec.items.forEach { t ->
                                             Box(modifier = Modifier.size(24.dp).clip(RoundedCornerShape(6.dp)).background(t.color).clickable { viewModel.loadUrl(t.url) }, contentAlignment = Alignment.Center) {
@@ -186,7 +190,7 @@ fun CreatorDashboardView(viewModel: BrowserViewModel, modifier: Modifier = Modif
             }
         }
 
-        // 3. Quick Action Apps
+        // 3. Quick Action Apps (With Logo Styling)
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -200,15 +204,47 @@ fun CreatorDashboardView(viewModel: BrowserViewModel, modifier: Modifier = Modif
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     favoriteApps.take(3).forEach { app ->
-                        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.clip(RoundedCornerShape(12.dp)).clickable { viewModel.loadUrl(app.url) }.padding(4.dp)) {
-                            Box(modifier = Modifier.size(54.dp).clip(CircleShape).background(Color(0xFF16132D)).border(BorderStroke(1.8.dp, app.color), CircleShape), contentAlignment = Alignment.Center) {
-                                Text(app.initial, color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(6.dp),
+                            modifier = Modifier.clip(RoundedCornerShape(12.dp)).clickable { viewModel.loadUrl(app.url) }.padding(4.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier.size(54.dp).clip(CircleShape).background(Color(0xFF16132D))
+                                    .border(BorderStroke(1.8.dp, app.color), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (app.id == "youtube") {
+                                    Box(
+                                        modifier = Modifier.size(30.dp, 22.dp).clip(RoundedCornerShape(6.dp)).background(Color(0xFFFF0000)),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(Icons.Default.PlayArrow, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                                    }
+                                } else if (app.id == "spotify") {
+                                    Box(
+                                        modifier = Modifier.size(28.dp).clip(CircleShape).background(Color(0xFF1DB954)),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(Icons.Default.MusicNote, contentDescription = null, tint = Color.White, modifier = Modifier.size(17.dp))
+                                    }
+                                } else {
+                                    Text(app.initial, color = app.color, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
+                                }
                             }
                             Text(app.name, color = TextPrimary, fontSize = 11.sp, fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         }
                     }
-                    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.clip(RoundedCornerShape(12.dp)).clickable { showAddDialog = true }.padding(4.dp)) {
-                        Box(modifier = Modifier.size(54.dp).clip(CircleShape).background(Color(0xFF1E1736)).border(BorderStroke(1.5.dp, neonPurple), CircleShape), contentAlignment = Alignment.Center) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                        modifier = Modifier.clip(RoundedCornerShape(12.dp)).clickable { showAddDialog = true }.padding(4.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier.size(54.dp).clip(CircleShape).background(Color(0xFF1E1736))
+                                .border(BorderStroke(1.5.dp, neonPurple), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
                             Icon(Icons.Default.Add, contentDescription = "Add new", tint = neonPink, modifier = Modifier.size(28.dp))
                         }
                         Text("Add new", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Medium)
@@ -217,9 +253,10 @@ fun CreatorDashboardView(viewModel: BrowserViewModel, modifier: Modifier = Modif
             }
         }
 
-        // 4. Project Pills (2x2 Grid)
+        // 4. Project Pills (2x2 Grid with Edit Pencils)
         item {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                // Row 1
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Box(
                         modifier = Modifier.weight(1f).height(52.dp).clip(RoundedCornerShape(20.dp)).background(cyberCardBg)
@@ -231,6 +268,7 @@ fun CreatorDashboardView(viewModel: BrowserViewModel, modifier: Modifier = Modif
                                 Text(projectPills[0].initial, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                             }
                             Text(projectPills[0].title, color = TextPrimary, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+                            Icon(Icons.Default.Edit, contentDescription = null, tint = Color(0xFF7A789E), modifier = Modifier.size(15.dp))
                         }
                     }
                     Box(
@@ -243,9 +281,12 @@ fun CreatorDashboardView(viewModel: BrowserViewModel, modifier: Modifier = Modif
                                 Text(projectPills[1].initial, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                             }
                             Text(projectPills[1].title, color = TextPrimary, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+                            Icon(Icons.Default.Edit, contentDescription = null, tint = Color(0xFF7A789E), modifier = Modifier.size(15.dp))
                         }
                     }
                 }
+
+                // Row 2
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Box(
                         modifier = Modifier.weight(1f).height(52.dp).clip(RoundedCornerShape(20.dp)).background(cyberCardBg)
@@ -257,6 +298,7 @@ fun CreatorDashboardView(viewModel: BrowserViewModel, modifier: Modifier = Modif
                                 Text(projectPills[2].initial, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                             }
                             Text(projectPills[2].title, color = TextPrimary, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+                            Icon(Icons.Default.Edit, contentDescription = null, tint = Color(0xFF7A789E), modifier = Modifier.size(15.dp))
                         }
                     }
                     Box(
@@ -264,15 +306,4 @@ fun CreatorDashboardView(viewModel: BrowserViewModel, modifier: Modifier = Modif
                             .border(BorderStroke(1.2.dp, cyberGradient), RoundedCornerShape(20.dp)).clickable { viewModel.loadUrl(projectPills[3].url) }.padding(horizontal = 10.dp),
                         contentAlignment = Alignment.CenterStart
                     ) {
-                        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Box(modifier = Modifier.size(28.dp).clip(CircleShape).background(projectPills[3].color), contentAlignment = Alignment.Center) {
-                                Text(projectPills[3].initial, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                            }
-                            Text(projectPills[3].title, color = TextPrimary, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
+                        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arran
