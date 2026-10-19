@@ -25,7 +25,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.viewmodel.BrowserViewModel
 
+// 1. शॉर्टकट डेटा मॉडल
 data class DashboardShortcut(
     val id: String,
     val title: String,
@@ -36,9 +38,11 @@ data class DashboardShortcut(
 @Composable
 fun CreatorDashboardView(
     modifier: Modifier = Modifier,
-    onNavigateToUrl: (String) -> Unit = {},
+    viewModel: BrowserViewModel? = null,
+    onNavigateToUrl: (String) -> Unit = { url -> viewModel?.loadUrl(url) },
     isDark: Boolean = isSystemInDarkTheme()
 ) {
+    // 4x4 डिफ़ॉल्ट क्विक एक्सेस लिस्ट
     val shortcuts = remember {
         mutableStateListOf(
             DashboardShortcut("1", "Google", "https://www.google.com"),
@@ -64,6 +68,7 @@ fun CreatorDashboardView(
             .verticalScroll(scrollState)
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
+        // हेडर: पसंदीदा वेबसाइट्स (4x4 ग्रिड)
         Text(
             text = "पसंदीदा वेबसाइट्स (4x4 ग्रिड)",
             fontSize = 15.sp,
@@ -72,6 +77,7 @@ fun CreatorDashboardView(
             modifier = Modifier.padding(bottom = 12.dp)
         )
 
+        // 4x4 ग्रिड कंटेनर (Fixed 4 Columns)
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(20.dp),
@@ -90,6 +96,7 @@ fun CreatorDashboardView(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 userScrollEnabled = false
             ) {
+                // शॉर्टकट आइटम्स
                 items(shortcuts, key = { it.id }) { item ->
                     DashboardShortcutItem(
                         title = item.title,
@@ -99,6 +106,7 @@ fun CreatorDashboardView(
                     )
                 }
 
+                // '+' नया शॉर्टकट जोड़ने वाला बटन
                 item {
                     AddDashboardItem(
                         isDark = isDark,
@@ -110,6 +118,7 @@ fun CreatorDashboardView(
 
         Spacer(modifier = Modifier.height(20.dp))
 
+        // क्रिएटर डेस्कटॉप टूल्स सेक्शन
         Text(
             text = "क्रिएटर स्टूडियो (डेस्कटॉप मोड)",
             fontSize = 15.sp,
@@ -142,6 +151,7 @@ fun CreatorDashboardView(
         }
     }
 
+    // नया शॉर्टकट जोड़ने का डायलॉग (AlertDialog)
     if (showAddDialog) {
         AlertDialog(
             onDismissRequest = { showAddDialog = false },
