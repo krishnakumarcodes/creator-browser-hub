@@ -2,6 +2,7 @@ package com.example.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -23,6 +24,19 @@ import androidx.compose.ui.unit.sp
 import com.example.ui.theme.*
 import com.example.viewmodel.BrowserViewModel
 
+// 🎨 साइबरपंक नियॉन कलर्स और ग्रेडिएंट
+private val CyberBg = Color(0xFF08071A)
+private val CyberCardBg = Color(0xE6121026)
+private val NeonPink = Color(0xFFFF2E93)
+private val NeonCyan = Color(0xFF00F0FF)
+private val NeonGreen = Color(0xFF10FFA0)
+private val NeonAmber = Color(0xFFFFB800)
+private val NeonPurple = Color(0xFF9D4EDD)
+
+private val CyberGradient = Brush.horizontalGradient(
+    listOf(NeonPurple, NeonPink, NeonCyan, NeonGreen)
+)
+
 data class CyberAppItem(
     val id: String,
     val name: String,
@@ -38,29 +52,22 @@ data class CyberProjectItem(
     val color: Color
 )
 
+data class ToolkitApp(
+    val initial: String,
+    val url: String,
+    val color: Color
+)
+
 @Composable
 fun CreatorDashboardView(
     viewModel: BrowserViewModel,
     modifier: Modifier = Modifier
 ) {
-    // 🎨 नियॉन कलर्स और ग्रेडिएंट
-    val cyberBg = Color(0xFF08071A)
-    val cyberCardBg = Color(0xE6121026)
-    val neonPink = Color(0xFFFF2E93)
-    val neonCyan = Color(0xFF00F0FF)
-    val neonGreen = Color(0xFF10FFA0)
-    val neonAmber = Color(0xFFFFB800)
-    val neonPurple = Color(0xFF9D4EDD)
-
-    val cyberGradient = Brush.horizontalGradient(
-        listOf(neonPurple, neonPink, neonCyan, neonGreen)
-    )
-
     var showAddDialog by remember { mutableStateOf(false) }
     var newName by remember { mutableStateOf("") }
     var newUrl by remember { mutableStateOf("") }
 
-    // 🟢 पसंदीदा ऐप्स लिस्ट (WhatsApp, YouTube, Spotify + naye apps)
+    // 🟢 पसंदीदा ऐप्स लिस्ट (WhatsApp, YouTube, Spotify)
     var favoriteApps by remember {
         mutableStateOf(
             listOf(
@@ -68,6 +75,16 @@ fun CreatorDashboardView(
                 CyberAppItem("youtube", "YouTube", "https://www.youtube.com", "Y", Color(0xFFFF0000)),
                 CyberAppItem("spotify", "Spotify", "https://open.spotify.com", "S", Color(0xFF1DB954))
             )
+        )
+    }
+
+    // 🟢 2x2 प्रोजेक्ट कार्ड्स
+    val projectPills = remember {
+        listOf(
+            CyberProjectItem("Github Repo Rework", "https://github.com", "G", Color(0xFF24292E)),
+            CyberProjectItem("Figma Wireframes", "https://www.figma.com", "F", Color(0xFFA259FF)),
+            CyberProjectItem("Unsplash Curated Photos", "https://unsplash.com", "U", Color(0xFF111111)),
+            CyberProjectItem("Notion Content Calendar", "https://www.notion.so", "N", Color(0xFF000000))
         )
     }
 
@@ -94,7 +111,7 @@ fun CreatorDashboardView(
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedTextColor = TextPrimary,
                             unfocusedTextColor = TextPrimary,
-                            focusedBorderColor = neonCyan,
+                            focusedBorderColor = NeonCyan,
                             unfocusedBorderColor = DarkBorder
                         )
                     )
@@ -106,7 +123,7 @@ fun CreatorDashboardView(
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedTextColor = TextPrimary,
                             unfocusedTextColor = TextPrimary,
-                            focusedBorderColor = neonCyan,
+                            focusedBorderColor = NeonCyan,
                             unfocusedBorderColor = DarkBorder
                         )
                     )
@@ -126,7 +143,7 @@ fun CreatorDashboardView(
                                 name = newName.trim(),
                                 url = cleanUrl,
                                 initial = newName.trim().take(1).uppercase(),
-                                color = neonCyan
+                                color = NeonCyan
                             )
                             favoriteApps = favoriteApps + newItem
                             newName = ""
@@ -135,7 +152,7 @@ fun CreatorDashboardView(
                             viewModel.showMessage("${newItem.name} होम स्क्रीन पर जुड़ गया!")
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = neonPurple)
+                    colors = ButtonDefaults.buttonColors(containerColor = NeonPurple)
                 ) {
                     Text("जोड़ें", color = Color.White)
                 }
@@ -151,25 +168,24 @@ fun CreatorDashboardView(
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .background(cyberBg)
+            .background(CyberBg)
             .padding(horizontal = 16.dp),
-        contentPadding = PaddingValues(top = 12.dp, bottom = 28.dp),
+        contentPadding = PaddingValues(top = 12.dp, bottom = 32.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // 1. टॉप सर्च बार (Google 'G' + Search Web + Mic)
         item {
-            Surface(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(54.dp),
-                shape = RoundedCornerShape(27.dp),
-                color = cyberCardBg,
-                border = BorderStroke(1.5.dp, cyberGradient)
+                    .height(54.dp)
+                    .clip(RoundedCornerShape(27.dp))
+                    .background(CyberCardBg)
+                    .border(BorderStroke(1.5.dp, CyberGradient), RoundedCornerShape(27.dp))
+                    .padding(horizontal = 16.dp)
             ) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp),
+                    modifier = Modifier.fillMaxSize(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
@@ -180,24 +196,24 @@ fun CreatorDashboardView(
                             .clickable { viewModel.loadUrl("https://www.google.com") }
                             .padding(4.dp)
                     ) {
-                        Surface(
-                            shape = CircleShape,
-                            color = Color(0xFF4285F4),
-                            modifier = Modifier.size(24.dp)
+                        Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFF4285F4)),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Text(
-                                    text = "G",
-                                    color = Color.White,
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
+                            Text(
+                                text = "G",
+                                color = Color.White,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold
+                            )
                         }
                         Spacer(modifier = Modifier.width(4.dp))
                         Icon(
                             imageVector = Icons.Default.ArrowDropDown,
-                            contentDescription = "Search Selector",
+                            contentDescription = "Search Engine",
                             tint = TextSecondary,
                             modifier = Modifier.size(18.dp)
                         )
@@ -213,7 +229,7 @@ fun CreatorDashboardView(
                     )
 
                     IconButton(
-                        onClick = { viewModel.showMessage("वॉइस सर्च सक्रिय है") },
+                        onClick = { viewModel.showMessage("वॉइस सर्च सक्षम है") },
                         modifier = Modifier.size(36.dp)
                     ) {
                         Icon(
@@ -232,8 +248,8 @@ fun CreatorDashboardView(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = cyberCardBg),
-                border = BorderStroke(1.5.dp, cyberGradient)
+                colors = CardDefaults.cardColors(containerColor = CyberCardBg),
+                border = BorderStroke(1.5.dp, CyberGradient)
             ) {
                 Column(
                     modifier = Modifier.padding(18.dp),
@@ -254,21 +270,21 @@ fun CreatorDashboardView(
                     ) {
                         Text(
                             text = "DAILY CREATION FLOW: 4.2 HRS",
-                            color = neonPink,
+                            color = NeonPink,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 0.8.sp
                         )
                         Text(
                             text = "PROJECTS ACTIVE: 3",
-                            color = neonCyan,
+                            color = NeonCyan,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 0.8.sp
                         )
                         Text(
                             text = "INSPIRATION BLOCKS CLEARED: 12",
-                            color = neonGreen,
+                            color = NeonGreen,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 0.8.sp
@@ -283,143 +299,163 @@ fun CreatorDashboardView(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         // WORKSPACE BOX
-                        Surface(
-                            shape = RoundedCornerShape(14.dp),
-                            color = Color(0xFF16132D),
-                            border = BorderStroke(1.dp, neonPink.copy(alpha = 0.8f)),
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 8.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(2.dp)
-                                ) {
-                                    Text(
-                                        text = "WORKSPACE",
-                                        color = neonPink,
-                                        fontSize = 9.sp,
-                                        fontWeight = FontWeight.ExtraBold
-                                    )
-                                    Icon(
-                                        imageVector = Icons.Default.Edit,
-                                        contentDescription = null,
-                                        tint = neonPink.copy(alpha = 0.7f),
-                                        modifier = Modifier.size(10.dp)
-                                    )
-                                }
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceAround
-                                ) {
-                                    Surface(
-                                        shape = RoundedCornerShape(6.dp),
-                                        color = Color(0xFFA259FF),
-                                        modifier = Modifier.size(24.dp).clickable { viewModel.loadUrl("https://www.figma.com") }
-                                    ) {
-                                        Box(contentAlignment = Alignment.Center) {
-                                            Text(text = "F", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                                        }
-                                    }
-                                    Surface(
-                                        shape = RoundedCornerShape(6.dp),
-                                        color = Color(0xFF000000),
-                                        modifier = Modifier.size(24.dp).clickable { viewModel.loadUrl("https://www.notion.so") }
-                                    ) {
-                                        Box(contentAlignment = Alignment.Center) {
-                                            Text(text = "N", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                                        }
-                                    }
-                                    Surface(
-                                        shape = RoundedCornerShape(6.dp),
-                                        color = Color(0xFF007ACC),
-                                        modifier = Modifier.size(24.dp).clickable { viewModel.loadUrl("https://vscode.dev") }
-                                    ) {
-                                        Box(contentAlignment = Alignment.Center) {
-                                            Text(text = "V", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        ToolkitBox(
+                            title = "WORKSPACE",
+                            accentColor = NeonPink,
+                            modifier = Modifier.weight(1f),
+                            apps = listOf(
+                                ToolkitApp("F", "https://www.figma.com", Color(0xFFA259FF)),
+                                ToolkitApp("N", "https://www.notion.so", Color(0xFF000000)),
+                                ToolkitApp("V", "https://vscode.dev", Color(0xFF007ACC))
+                            ),
+                            onAppClick = { viewModel.loadUrl(it) }
+                        )
 
                         // COMMUNITY BOX
-                        Surface(
-                            shape = RoundedCornerShape(14.dp),
-                            color = Color(0xFF16132D),
-                            border = BorderStroke(1.dp, neonCyan.copy(alpha = 0.8f)),
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 8.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(2.dp)
-                                ) {
-                                    Text(
-                                        text = "COMMUNITY",
-                                        color = neonCyan,
-                                        fontSize = 9.sp,
-                                        fontWeight = FontWeight.ExtraBold
-                                    )
-                                    Icon(
-                                        imageVector = Icons.Default.Edit,
-                                        contentDescription = null,
-                                        tint = neonCyan.copy(alpha = 0.7f),
-                                        modifier = Modifier.size(10.dp)
-                                    )
-                                }
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceAround
-                                ) {
-                                    Surface(
-                                        shape = RoundedCornerShape(6.dp),
-                                        color = Color(0xFF5865F2),
-                                        modifier = Modifier.size(24.dp).clickable { viewModel.loadUrl("https://discord.com") }
-                                    ) {
-                                        Box(contentAlignment = Alignment.Center) {
-                                            Text(text = "D", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                                        }
-                                    }
-                                    Surface(
-                                        shape = RoundedCornerShape(6.dp),
-                                        color = Color(0xFFE01E5A),
-                                        modifier = Modifier.size(24.dp).clickable { viewModel.loadUrl("https://slack.com") }
-                                    ) {
-                                        Box(contentAlignment = Alignment.Center) {
-                                            Text(text = "S", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                                        }
-                                    }
-                                    Surface(
-                                        shape = RoundedCornerShape(6.dp),
-                                        color = Color(0xFF24292E),
-                                        modifier = Modifier.size(24.dp).clickable { viewModel.loadUrl("https://github.com") }
-                                    ) {
-                                        Box(contentAlignment = Alignment.Center) {
-                                            Text(text = "G", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        ToolkitBox(
+                            title = "COMMUNITY",
+                            accentColor = NeonCyan,
+                            modifier = Modifier.weight(1f),
+                            apps = listOf(
+                                ToolkitApp("D", "https://discord.com", Color(0xFF5865F2)),
+                                ToolkitApp("S", "https://slack.com", Color(0xFFE01E5A)),
+                                ToolkitApp("G", "https://github.com", Color(0xFF24292E))
+                            ),
+                            onAppClick = { viewModel.loadUrl(it) }
+                        )
 
                         // ASSETS BOX
-                        Surface(
-                            shape = RoundedCornerShape(14.dp),
-                            color = Color(0xFF16132D),
-                            border = BorderStroke(1.dp, neonAmber.copy(alpha = 0.8f)),
-                            modifier = Modifier.weight(1f)
+                        ToolkitBox(
+                            title = "ASSETS",
+                            accentColor = NeonAmber,
+                            modifier = Modifier.weight(1f),
+                            apps = listOf(
+                                ToolkitApp("D", "https://drive.google.com", Color(0xFF0F9D58)),
+                                ToolkitApp("B", "https://www.dropbox.com", Color(0xFF0061FF)),
+                                ToolkitApp("C", "https://chrome.google.com", Color(0xFFEA4335))
+                            ),
+                            onAppClick = { viewModel.loadUrl(it) }
+                        )
+                    }
+                }
+            }
+        }
+
+        // 3. क्विक एक्शन सर्कल्स (WhatsApp, YouTube, Spotify, Add new)
+        item {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(22.dp),
+                colors = CardDefaults.cardColors(containerColor = CyberCardBg),
+                border = BorderStroke(1.2.dp, CyberGradient)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp, horizontal = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceAround,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    favoriteApps.take(3).forEach { app ->
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(6.dp),
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .clickable { viewModel.loadUrl(app.url) }
+                                .padding(4.dp)
                         ) {
-                            Column(
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 8.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(6.dp)
+                            Box(
+                                modifier = Modifier
+                                    .size(54.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(0xFF16132D))
+                                    .border(BorderStroke(1.8.dp, app.color), CircleShape),
+                                contentAlignment = Alignment.Center
                             ) {
+                                Text(
+                                    text = app.initial,
+                                    color = Color.White,
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.ExtraBold
+                                )
+                            }
+                            Text(
+                                text = app.name,
+                                color = TextPrimary,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Medium,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    }
+
+                    // (+) Add new
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .clickable { showAddDialog = true }
+                            .padding(4.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(54.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFF1E1736))
+                                .border(BorderStroke(1.5.dp, NeonPurple), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Add new",
+                                tint = NeonPink,
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
+                        Text(
+                            text = "Add new",
+                            color = TextSecondary,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+            }
+        }
+
+        // 4. प्रोजेक्ट्स पिल्स (2-कॉलम: GitHub, Figma, Unsplash, Notion)
+        item {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                projectPills.chunked(2).forEach { rowPills ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        rowPills.forEach { pill ->
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(52.dp)
+                                    .clip(RoundedCornerShape(20.dp))
+                                    .background(CyberCardBg)
+                                    .border(BorderStroke(1.2.dp, CyberGradient), RoundedCornerShape(20.dp))
+                                    .clickable { viewModel.loadUrl(pill.url) }
+                                    .padding(horizontal = 10.dp),
+                                contentAlignment = Alignment.CenterStart
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(28.dp)
+                                            .clip(CircleShape)
+                                            .background(pill.color),
+                                        contentAlignment = Alignment.Center
+                                    ) {
                          
