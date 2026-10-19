@@ -84,7 +84,12 @@ fun CreatorDashboardView(
             onDismissRequest = { showAddDialog = false },
             containerColor = DarkSurfaceElevated,
             title = {
-                Text("नया शॉर्टकट जोड़ें", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text(
+                    text = "नया शॉर्टकट जोड़ें",
+                    color = TextPrimary,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
             },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -106,7 +111,11 @@ fun CreatorDashboardView(
                 Button(
                     onClick = {
                         if (newName.isNotBlank() && newUrl.isNotBlank()) {
-                            val cleanUrl = if (newUrl.startsWith("http")) newUrl.trim() else "https://${newUrl.trim()}"
+                            val cleanUrl = if (newUrl.startsWith("http")) {
+                                newUrl.trim()
+                            } else {
+                                "https://${newUrl.trim()}"
+                            }
                             val newItem = CyberAppItem(
                                 id = "custom_${System.currentTimeMillis()}",
                                 name = newName.trim(),
@@ -118,7 +127,7 @@ fun CreatorDashboardView(
                             newName = ""
                             newUrl = ""
                             showAddDialog = false
-                            viewModel.showMessage("जुड़ गया!")
+                            viewModel.showMessage("${newItem.name} होम स्क्रीन पर जुड़ गया!")
                         }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = neonPurple)
@@ -142,7 +151,7 @@ fun CreatorDashboardView(
         contentPadding = PaddingValues(top = 12.dp, bottom = 32.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // 1. Search Bar
+        // 1. Top Search Bar
         item {
             Box(
                 modifier = Modifier
@@ -173,10 +182,20 @@ fun CreatorDashboardView(
                                     .background(Color(0xFF4285F4)),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text("G", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                                Text(
+                                    text = "G",
+                                    color = Color.White,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
                             }
                             Spacer(modifier = Modifier.width(4.dp))
-                            Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = TextSecondary, modifier = Modifier.size(18.dp))
+                            Icon(
+                                imageVector = Icons.Default.ArrowDropDown,
+                                contentDescription = null,
+                                tint = TextSecondary,
+                                modifier = Modifier.size(18.dp)
+                            )
                         }
                     }
 
@@ -190,16 +209,21 @@ fun CreatorDashboardView(
                     )
 
                     IconButton(
-                        onClick = { viewModel.showMessage("वॉइस सर्च सक्षम है") },
+                        onClick = { viewModel.showMessage("वॉइस सर्च सक्रिय है") },
                         modifier = Modifier.size(36.dp)
                     ) {
-                        Icon(Icons.Default.Mic, contentDescription = null, tint = TextPrimary, modifier = Modifier.size(22.dp))
+                        Icon(
+                            imageVector = Icons.Default.Mic,
+                            contentDescription = null,
+                            tint = TextPrimary,
+                            modifier = Modifier.size(22.dp)
+                        )
                     }
                 }
             }
         }
 
-        // 2. Creator Nexus Card
+        // 2. Main Creator Nexus Card
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -212,19 +236,44 @@ fun CreatorDashboardView(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Text("Creator Nexus", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.2.sp)
+                    Text(
+                        text = "Creator Nexus",
+                        color = Color.White,
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.2.sp
+                    )
 
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        Text("DAILY CREATION FLOW: 4.2 HRS", color = neonPink, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                        Text("PROJECTS ACTIVE: 3", color = neonCyan, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                        Text("INSPIRATION BLOCKS CLEARED: 12", color = neonGreen, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        Text(
+                            text = "DAILY CREATION FLOW: 4.2 HRS",
+                            color = neonPink,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 0.8.sp
+                        )
+                        Text(
+                            text = "PROJECTS ACTIVE: 3",
+                            color = neonCyan,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 0.8.sp
+                        )
+                        Text(
+                            text = "INSPIRATION BLOCKS CLEARED: 12",
+                            color = neonGreen,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 0.8.sp
+                        )
                     }
 
                     Spacer(modifier = Modifier.height(4.dp))
 
+                    // 3 Category Boxes
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -243,13 +292,46 @@ fun CreatorDashboardView(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text("WORKSPACE", color = neonPink, fontSize = 9.sp, fontWeight = FontWeight.ExtraBold)
-                                }
-                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
-                                    Box(modifier = Modifier.size(24.dp).clip(RoundedCornerShape(6.dp)).background(Color(0xFFA259FF)).clickable { viewModel.loadUrl("https://www.figma.com") }, contentAlignment = Alignment.Center) { Text("F", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold) }
-                                    Box(modifier = Modifier.size(24.dp).clip(RoundedCornerShape(6.dp)).background(Color(0xFF000000)).clickable { viewModel.loadUrl("https://www.notion.so") }, contentAlignment = Alignment.Center) { Text("N", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold) }
-                                    Box(modifier = Modifier.size(24.dp).clip(RoundedCornerShape(6.dp)).background(Color(0xFF007ACC)).clickable { viewModel.loadUrl("https://vscode.dev") }, contentAlignment = Alignment.Center) { Text("V", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold) }
+                                Text(
+                                    text = "WORKSPACE",
+                                    color = neonPink,
+                                    fontSize = 9.sp,
+                                    fontWeight = FontWeight.ExtraBold
+                                )
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceAround
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(24.dp)
+                                            .clip(RoundedCornerShape(6.dp))
+                                            .background(Color(0xFFA259FF))
+                                            .clickable { viewModel.loadUrl("https://www.figma.com") },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text("F", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                    }
+                                    Box(
+                                        modifier = Modifier
+                                            .size(24.dp)
+                                            .clip(RoundedCornerShape(6.dp))
+                                            .background(Color(0xFF000000))
+                                            .clickable { viewModel.loadUrl("https://www.notion.so") },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text("N", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                    }
+                                    Box(
+                                        modifier = Modifier
+                                            .size(24.dp)
+                                            .clip(RoundedCornerShape(6.dp))
+                                            .background(Color(0xFF007ACC))
+                                            .clickable { viewModel.loadUrl("https://vscode.dev") },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text("V", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                    }
                                 }
                             }
                         }
@@ -268,13 +350,46 @@ fun CreatorDashboardView(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text("COMMUNITY", color = neonCyan, fontSize = 9.sp, fontWeight = FontWeight.ExtraBold)
-                                }
-                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
-                                    Box(modifier = Modifier.size(24.dp).clip(RoundedCornerShape(6.dp)).background(Color(0xFF5865F2)).clickable { viewModel.loadUrl("https://discord.com") }, contentAlignment = Alignment.Center) { Text("D", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold) }
-                                    Box(modifier = Modifier.size(24.dp).clip(RoundedCornerShape(6.dp)).background(Color(0xFFE01E5A)).clickable { viewModel.loadUrl("https://slack.com") }, contentAlignment = Alignment.Center) { Text("S", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold) }
-                                    Box(modifier = Modifier.size(24.dp).clip(RoundedCornerShape(6.dp)).background(Color(0xFF24292E)).clickable { viewModel.loadUrl("https://github.com") }, contentAlignment = Alignment.Center) { Text("G", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold) }
+                                Text(
+                                    text = "COMMUNITY",
+                                    color = neonCyan,
+                                    fontSize = 9.sp,
+                                    fontWeight = FontWeight.ExtraBold
+                                )
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceAround
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(24.dp)
+                                            .clip(RoundedCornerShape(6.dp))
+                                            .background(Color(0xFF5865F2))
+                                            .clickable { viewModel.loadUrl("https://discord.com") },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text("D", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                    }
+                                    Box(
+                                        modifier = Modifier
+                                            .size(24.dp)
+                                            .clip(RoundedCornerShape(6.dp))
+                                            .background(Color(0xFFE01E5A))
+                                            .clickable { viewModel.loadUrl("https://slack.com") },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text("S", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                    }
+                                    Box(
+                                        modifier = Modifier
+                                            .size(24.dp)
+                                            .clip(RoundedCornerShape(6.dp))
+                                            .background(Color(0xFF24292E))
+                                            .clickable { viewModel.loadUrl("https://github.com") },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text("G", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                    }
                                 }
                             }
                         }
@@ -293,86 +408,23 @@ fun CreatorDashboardView(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text("ASSETS", color = neonAmber, fontSize = 9.sp, fontWeight = FontWeight.ExtraBold)
-                                }
-                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
-                                    Box(modifier = Modifier.size(24.dp).clip(RoundedCornerShape(6.dp)).background(Color(0xFF0F9D58)).clickable { viewModel.loadUrl("https://drive.google.com") }, contentAlignment = Alignment.Center) { Text("D", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold) }
-                                    Box(modifier = Modifier.size(24.dp).clip(RoundedCornerShape(6.dp)).background(Color(0xFF0061FF)).clickable { viewModel.loadUrl("https://www.dropbox.com") }, contentAlignment = Alignment.Center) { Text("B", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold) }
-                                    Box(modifier = Modifier.size(24.dp).clip(RoundedCornerShape(6.dp)).background(Color(0xFFEA4335)).clickable { viewModel.loadUrl("https://chrome.google.com") }, contentAlignment = Alignment.Center) { Text("C", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold) }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // 3. Quick Action Apps
-        item {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(22.dp),
-                colors = CardDefaults.cardColors(containerColor = cyberCardBg),
-                border = BorderStroke(1.2.dp, cyberGradient)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp, horizontal = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceAround,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    favoriteApps.take(3).forEach { app ->
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(6.dp),
-                            modifier = Modifier.clip(RoundedCornerShape(12.dp)).clickable { viewModel.loadUrl(app.url) }.padding(4.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier.size(54.dp).clip(CircleShape).background(Color(0xFF16132D)).border(BorderStroke(1.8.dp, app.color), CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(app.initial, color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
-                            }
-                            Text(app.name, color = TextPrimary, fontSize = 11.sp, fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        }
-                    }
-
-                    // Add Button
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(6.dp),
-                        modifier = Modifier.clip(RoundedCornerShape(12.dp)).clickable { showAddDialog = true }.padding(4.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier.size(54.dp).clip(CircleShape).background(Color(0xFF1E1736)).border(BorderStroke(1.5.dp, neonPurple), CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(Icons.Default.Add, contentDescription = "Add new", tint = neonPink, modifier = Modifier.size(28.dp))
-                        }
-                        Text("Add new", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Medium)
-                    }
-                }
-            }
-        }
-
-        // 4. Project Pills
-        item {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                projectPills.chunked(2).forEach { rowPills ->
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        rowPills.forEach { pill ->
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(52.dp)
-                                    .clip(RoundedCornerShape(20.dp))
-                                    .background(cyberCardBg)
-                                    .border(BorderStroke(1.2.dp, cyberGradient), RoundedCornerShape(20.dp))
-                                    .clickable { viewModel.loadUrl(pill.url) }
-                                    .padding(horizontal = 10.dp),
-                                contentAlignment = Alignment.CenterStart
-                            ) {
+                                Text(
+                                    text = "ASSETS",
+                                    color = neonAmber,
+                                    fontSize = 9.sp,
+                                    fontWeight = FontWeight.ExtraBold
+                                )
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically,
-   
+                                    horizontalArrangement = Arrangement.SpaceAround
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(24.dp)
+                                            .clip(RoundedCornerShape(6.dp))
+                                            .background(Color(0xFF0F9D58))
+                                            .clickable { viewModel.loadUrl("https://drive.google.com") },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text("D", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+           
