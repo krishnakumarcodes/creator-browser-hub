@@ -10,7 +10,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -30,7 +29,6 @@ class MainActivity : ComponentActivity() {
         setContent {
             val browserViewModel: BrowserViewModel = viewModel()
             val isDarkMode by browserViewModel.isDarkMode.collectAsState()
-
             MyApplicationTheme(darkTheme = isDarkMode) {
                 CreatorBrowserApp(viewModel = browserViewModel)
             }
@@ -52,8 +50,7 @@ fun CreatorBrowserApp(
     val uiMessage by viewModel.uiMessage.collectAsState()
     val isDarkMode by viewModel.isDarkMode.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
-
-    val currentBgColor = if (isDarkMode) DarkBackground else Color(0xFFF8FAFC)
+    val currentBgColor = Color(0xFF090A16)
 
     LaunchedEffect(uiMessage) {
         uiMessage?.let {
@@ -90,12 +87,6 @@ fun CreatorBrowserApp(
                 .fillMaxSize()
                 .background(currentBgColor),
             containerColor = currentBgColor,
-            topBar = {
-                BrowserTopBar(
-                    tab = currentTab,
-                    viewModel = viewModel
-                )
-            },
             bottomBar = {
                 BrowserBottomBar(
                     tab = currentTab,
