@@ -1,5 +1,6 @@
 package com.example.ui.components
 
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -19,13 +20,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.viewmodel.BrowserViewModel
 
-// Neon & Glow Colors
+// Neon Glow Palette
 val GlowDarkBg = Color(0xFF090A16)
 val GlassCard = Color(0xFF13152C).copy(alpha = 0.92f)
 val NeonPinkColor = Color(0xFFEC4899)
@@ -40,6 +42,7 @@ fun CreatorDashboardView(
     viewModel: BrowserViewModel,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     var showSearchEngineMenu by remember { mutableStateOf(false) }
     var selectedSearchEngine by remember { mutableStateOf("Google") }
 
@@ -146,7 +149,7 @@ fun CreatorDashboardView(
                             newName = ""
                             newUrl = ""
                             showAddDialog = false
-                            viewModel.showMessage("Shortcut added!")
+                            Toast.makeText(context, "Shortcut added!", Toast.LENGTH_SHORT).show()
                         }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = NeonPurpleColor)
@@ -246,7 +249,7 @@ fun CreatorDashboardView(
                                     onClick = {
                                         selectedSearchEngine = "Google"
                                         showSearchEngineMenu = false
-                                        viewModel.showMessage("Search engine: Google")
+                                        Toast.makeText(context, "Search: Google", Toast.LENGTH_SHORT).show()
                                     }
                                 )
                                 DropdownMenuItem(
@@ -254,7 +257,7 @@ fun CreatorDashboardView(
                                     onClick = {
                                         selectedSearchEngine = "Brave"
                                         showSearchEngineMenu = false
-                                        viewModel.showMessage("Search engine: Brave")
+                                        Toast.makeText(context, "Search: Brave", Toast.LENGTH_SHORT).show()
                                     }
                                 )
                                 DropdownMenuItem(
@@ -262,7 +265,7 @@ fun CreatorDashboardView(
                                     onClick = {
                                         selectedSearchEngine = "DuckDuckGo"
                                         showSearchEngineMenu = false
-                                        viewModel.showMessage("Search engine: DuckDuckGo")
+                                        Toast.makeText(context, "Search: DuckDuckGo", Toast.LENGTH_SHORT).show()
                                     }
                                 )
                                 DropdownMenuItem(
@@ -270,7 +273,7 @@ fun CreatorDashboardView(
                                     onClick = {
                                         selectedSearchEngine = "Startpage"
                                         showSearchEngineMenu = false
-                                        viewModel.showMessage("Search engine: Startpage")
+                                        Toast.makeText(context, "Search: Startpage", Toast.LENGTH_SHORT).show()
                                     }
                                 )
                             }
@@ -301,7 +304,7 @@ fun CreatorDashboardView(
                             modifier = Modifier
                                 .size(22.dp)
                                 .clickable {
-                                    viewModel.showMessage("Voice search activated")
+                                    Toast.makeText(context, "Voice search activated", Toast.LENGTH_SHORT).show()
                                 }
                         )
                     }
@@ -379,7 +382,7 @@ fun CreatorDashboardView(
                                 },
                                 onOpenAll = {
                                     viewModel.loadUrl("https://figma.com")
-                                    viewModel.showMessage("Opening Workspace...")
+                                    Toast.makeText(context, "Opening Workspace...", Toast.LENGTH_SHORT).show()
                                 },
                                 onAppClick = { url -> viewModel.loadUrl(url) },
                                 modifier = Modifier.weight(1f)
@@ -397,7 +400,7 @@ fun CreatorDashboardView(
                                 },
                                 onOpenAll = {
                                     viewModel.loadUrl("https://discord.com")
-                                    viewModel.showMessage("Opening Community...")
+                                    Toast.makeText(context, "Opening Community...", Toast.LENGTH_SHORT).show()
                                 },
                                 onAppClick = { url -> viewModel.loadUrl(url) },
                                 modifier = Modifier.weight(1f)
@@ -415,7 +418,7 @@ fun CreatorDashboardView(
                                 },
                                 onOpenAll = {
                                     viewModel.loadUrl("https://drive.google.com")
-                                    viewModel.showMessage("Opening Assets...")
+                                    Toast.makeText(context, "Opening Assets...", Toast.LENGTH_SHORT).show()
                                 },
                                 onAppClick = { url -> viewModel.loadUrl(url) },
                                 modifier = Modifier.weight(1f)
@@ -430,11 +433,4 @@ fun CreatorDashboardView(
                 Surface(
                     shape = RoundedCornerShape(20.dp),
                     color = GlassCard,
-                    border = BorderStroke(1.dp, Color(0xFF2C2754)),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 14.dp, horizontal = 8.dp),
-                        ho
+         
