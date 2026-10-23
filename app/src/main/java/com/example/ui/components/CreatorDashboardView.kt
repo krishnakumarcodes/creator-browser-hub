@@ -1,8 +1,9 @@
 package com.example.ui.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,59 +17,175 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.viewmodel.BrowserViewModel
 
-// Neon & Cyber Theme Palette
-val CyberBackground = Color(0xFF070714)
-val CardBackground = Color(0xFF13132B).copy(alpha = 0.85f)
-val NeonPurpleBorder = Color(0xFFA855F7)
-val NeonPink = Color(0xFFEC4899)
-val NeonCyan = Color(0xFF06B6D4)
-val NeonGreen = Color(0xFF10B981)
-val NeonOrange = Color(0xFFF97316)
-val GlowCardBg = Color(0xFF1A1635)
+// Neon & Glow Colors
+val GlowDarkBg = Color(0xFF090A16)
+val GlassCard = Color(0xFF13152C).copy(alpha = 0.92f)
+val NeonPinkColor = Color(0xFFEC4899)
+val NeonCyanColor = Color(0xFF06B6D4)
+val NeonGreenColor = Color(0xFF10B981)
+val NeonPurpleColor = Color(0xFFA855F7)
+val NeonOrangeColor = Color(0xFFF97316)
 
+data class FolderGroup(
+    val id: String,
+    var title: String,
+    val borderColor: Color,
+    val apps: MutableList<Pair<String, String>> // Name to URL
+)
+
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CreatorDashboardView(
     viewModel: BrowserViewModel,
     modifier: Modifier = Modifier
 ) {
-    var searchQuery by remember { mutableStateOf("") }
+    var showSearchEngineMenu by remember { mutableStateOf(false) }
+    var selectedSearchEngine by remember { mutableStateOf("Google") }
+    var searchQueryText by remember { mutableStateOf("") }
+
+    // Folder States
+    var workspaceTitle by remember { mutableStateOf("WORKSPACE") }
+    var communityTitle by remember { mutableStateOf("COMMUNITY") }
+    var assetsTitle by remember { mutableStateOf("ASSETS") }
+
+    // Dialog States
+    var showEditDialog by remember { mutableStateOf(false) }
+    var editingTarget by remember { mutableStateOf("") }
+    var editTextValue by remember { mutableStateOf("") }
+
+    // Shortcuts State
+    var customShortcuts by remember {
+        mutableStateOf(
+            listOf(
+                Triple("Github Repo\nRework", "GH", "https://github.com"),
+                Triple("Figma\nWireframes", "FG", "https://figma.com"),
+                Triple("Unsplash Curated\nPhotos", "UN", "https://unsplash.com"),
+                Triple("Notion Content\nCalendar", "NO", "https://notion.so")
+            )
+        )
+    }
+
+    // Add Shortcut Dialog
+    var showAddDialog by remember { mutableStateOf(false) }
+    var newName by remember { mutableStateOf("") }
+    var newUrl by remember { mutableStateOf("") }
+
+    if (showEditDialog) {
+        AlertDialog(
+            onDismissRequest = { showEditDialog = false },
+            containerColor = Color(0xFF1A1736),
+            title = { Text("Edit Name", color = Color.White, fontWeight = FontWeight.Bold) },
+            text = {
+                OutlinedTextField(
+                    value = editTextValue,
+                    onValueChange = { editTextValue = it },
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        focusedBorderColor = NeonPurpleColor,
+                        unfocusedBorderColor = Color(0xFF3B2D68)
+                    )
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        when (editingTarget) {
+                            "WORKSPACE" -> workspaceTitle = editTextValue
+                            "COMMUNITY" -> communityTitle = editTextValue
+                            "ASSETS" -> assetsTitle = editTextValue
+                        }
+                        showEditDialog = false
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = NeonPurpleColor)
+                ) {
+                    Text("Save")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEditDialog = false }) {
+                    Text("Cancel", color = Color.Gray)
+                }
+            }
+        )
+    }
+
+    if (showAddDialog) {
+        AlertDialog(
+            onDismissRequest = { showAddDialog = false },
+            containerColor = Color(0xFF1A1736),
+            title = { Text("Add New Shortcut", color = Color.White, fontWeight = FontWeight.Bold) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(
+                        value = newName,
+                        onValueChange = { newName = it },
+                        label = { Text("Name") },
+                        singleLine = true
+                    )
+                    OutlinedTextField(
+                        value = newUrl,
+                        onValueChange = { newUrl = it },
+                        label = { Text("URL (e.g. google.com)") },
+                        singleLine = true
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (newName.isNotBlank() && newUrl.isNotBlank()) {
+                            val cleanUrl = if (newUrl.startsWith("http")) newUrl else "https://$newUrl"
+                            customShortcuts = customShortcuts + Triple(newName, newName.take(2).uppercase(), cleanUrl)
+                            newName = ""
+                            newUrl = ""
+                            showAddDialog = false
+                            viewModel.showMessage("Shortcut added!")
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = NeonPurpleColor)
+                ) {
+                    Text("Add")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showAddDialog = false }) {
+                    Text("Cancel", color = Color.Gray)
+                }
+            }
+        )
+    }
 
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFF0B0820),
-                        Color(0xFF050510),
-                        Color(0xFF090A1A)
-                    )
+                    listOf(Color(0xFF0E0B25), Color(0xFF080716), Color(0xFF050510))
                 )
             )
     ) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 16.dp),
-            contentPadding = PaddingValues(top = 16.dp, bottom = 90.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(horizontal = 14.dp),
+            contentPadding = PaddingValues(top = 16.dp, bottom = 28.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            // 1. Cyber Search Bar
+            // 1. Cyber Search Bar with Search Engine Selector Dropdown
             item {
                 Surface(
-                    shape = RoundedCornerShape(26.dp),
-                    color = Color(0xFF161530).copy(alpha = 0.9f),
+                    shape = RoundedCornerShape(28.dp),
+                    color = Color(0xFF161533).copy(alpha = 0.95f),
                     border = BorderStroke(
                         1.5.dp,
                         Brush.horizontalGradient(
@@ -85,48 +202,123 @@ fun CreatorDashboardView(
                             .padding(horizontal = 14.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        // G Badge (Single Tap opens default engine search, Dropdown changes engine)
                         Surface(
                             shape = CircleShape,
-                            color = Color(0xFF232247),
-                            modifier = Modifier.size(32.dp)
+                            color = Color(0xFF23224C),
+                            modifier = Modifier
+                                .size(32.dp)
+                                .clickable {
+                                    val searchUrl = when (selectedSearchEngine) {
+                                        "Brave" -> "https://search.brave.com"
+                                        "DuckDuckGo" -> "https://duckduckgo.com"
+                                        "Startpage" -> "https://www.startpage.com"
+                                        else -> "https://www.google.com"
+                                    }
+                                    viewModel.loadUrl(searchUrl)
+                                }
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Text(
-                                    text = "G",
+                                    text = selectedSearchEngine.take(1),
                                     color = Color(0xFF4285F4),
                                     fontWeight = FontWeight.Black,
-                                    fontSize = 16.sp
+                                    fontSize = 17.sp
                                 )
                             }
                         }
-                        Icon(
-                            imageVector = Icons.Default.ArrowDropDown,
-                            contentDescription = null,
-                            tint = Color.Gray,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
+
+                        // Triangle Dropdown Arrow (Opens Engine Selector)
+                        Box {
+                            IconButton(
+                                onClick = { showSearchEngineMenu = true },
+                                modifier = Modifier.size(24.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.ArrowDropDown,
+                                    contentDescription = "Select Search Engine",
+                                    tint = Color(0xFF8E8EA8)
+                                )
+                            }
+
+                            DropdownMenu(
+                                expanded = showSearchEngineMenu,
+                                onDismissRequest = { showSearchEngineMenu = false },
+                                modifier = Modifier.background(Color(0xFF1B1838))
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("Google", color = Color.White) },
+                                    onClick = {
+                                        selectedSearchEngine = "Google"
+                                        showSearchEngineMenu = false
+                                        viewModel.showMessage("Search engine: Google")
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Brave Search", color = Color.White) },
+                                    onClick = {
+                                        selectedSearchEngine = "Brave"
+                                        showSearchEngineMenu = false
+                                        viewModel.showMessage("Search engine: Brave")
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("DuckDuckGo", color = Color.White) },
+                                    onClick = {
+                                        selectedSearchEngine = "DuckDuckGo"
+                                        showSearchEngineMenu = false
+                                        viewModel.showMessage("Search engine: DuckDuckGo")
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Startpage", color = Color.White) },
+                                    onClick = {
+                                        selectedSearchEngine = "Startpage"
+                                        showSearchEngineMenu = false
+                                        viewModel.showMessage("Search engine: Startpage")
+                                    }
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = "Search Web...",
                             color = Color(0xFF8E8EA8),
                             fontSize = 15.sp,
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier
+                                .weight(1f)
+                                .clickable {
+                                    val searchUrl = when (selectedSearchEngine) {
+                                        "Brave" -> "https://search.brave.com"
+                                        "DuckDuckGo" -> "https://duckduckgo.com"
+                                        "Startpage" -> "https://www.startpage.com"
+                                        else -> "https://www.google.com"
+                                    }
+                                    viewModel.loadUrl(searchUrl)
+                                }
                         )
+
+                        // Voice Search Mic Icon
                         Icon(
                             imageVector = Icons.Default.Mic,
                             contentDescription = "Voice Search",
                             tint = Color.White,
-                            modifier = Modifier.size(22.dp)
+                            modifier = Modifier
+                                .size(22.dp)
+                                .clickable {
+                                    viewModel.showMessage("Voice search activated")
+                                }
                         )
                     }
                 }
             }
 
-            // 2. Creator Nexus Dashboard Main Card
+            // 2. Creator Nexus Status Card
             item {
                 Surface(
                     shape = RoundedCornerShape(22.dp),
-                    color = GlowCardBg.copy(alpha = 0.9f),
+                    color = GlassCard,
                     border = BorderStroke(
                         1.5.dp,
                         Brush.linearGradient(
@@ -138,7 +330,7 @@ fun CreatorDashboardView(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(18.dp),
+                            .padding(16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
@@ -152,7 +344,7 @@ fun CreatorDashboardView(
 
                         Text(
                             text = "DAILY CREATION FLOW: 4.2 HRS",
-                            color = NeonPink,
+                            color = NeonPinkColor,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 0.8.sp
@@ -160,7 +352,7 @@ fun CreatorDashboardView(
 
                         Text(
                             text = "PROJECTS ACTIVE: 3",
-                            color = NeonCyan,
+                            color = NeonCyanColor,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 0.8.sp
@@ -168,35 +360,70 @@ fun CreatorDashboardView(
 
                         Text(
                             text = "INSPIRATION BLOCKS CLEARED: 12",
-                            color = NeonGreen,
+                            color = NeonGreenColor,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 0.8.sp
                         )
 
-                        Spacer(modifier = Modifier.height(6.dp))
+                        Spacer(modifier = Modifier.height(4.dp))
 
                         // Category Folders (WORKSPACE, COMMUNITY, ASSETS)
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            FolderChip(
-                                title = "WORKSPACE",
-                                borderColor = NeonPurpleBorder,
+                            InteractiveFolderChip(
+                                title = workspaceTitle,
+                                borderColor = NeonPurpleColor,
                                 icons = listOf("F", "N", "V"),
+                                urls = listOf("https://figma.com", "https://notion.so", "https://code.visualstudio.com"),
+                                onEditName = {
+                                    editingTarget = "WORKSPACE"
+                                    editTextValue = workspaceTitle
+                                    showEditDialog = true
+                                },
+                                onOpenAll = {
+                                    viewModel.loadUrl("https://figma.com")
+                                    viewModel.showMessage("Opening Workspace Apps...")
+                                },
+                                onAppClick = { url -> viewModel.loadUrl(url) },
                                 modifier = Modifier.weight(1f)
                             )
-                            FolderChip(
-                                title = "COMMUNITY",
-                                borderColor = NeonCyan,
+
+                            InteractiveFolderChip(
+                                title = communityTitle,
+                                borderColor = NeonCyanColor,
                                 icons = listOf("D", "S", "G"),
+                                urls = listOf("https://discord.com", "https://slack.com", "https://github.com"),
+                                onEditName = {
+                                    editingTarget = "COMMUNITY"
+                                    editTextValue = communityTitle
+                                    showEditDialog = true
+                                },
+                                onOpenAll = {
+                                    viewModel.loadUrl("https://discord.com")
+                                    viewModel.showMessage("Opening Community Apps...")
+                                },
+                                onAppClick = { url -> viewModel.loadUrl(url) },
                                 modifier = Modifier.weight(1f)
                             )
-                            FolderChip(
-                                title = "ASSETS",
-                                borderColor = NeonOrange,
+
+                            InteractiveFolderChip(
+                                title = assetsTitle,
+                                borderColor = NeonOrangeColor,
                                 icons = listOf("D", "B", "C"),
+                                urls = listOf("https://drive.google.com", "https://dropbox.com", "https://google.com"),
+                                onEditName = {
+                                    editingTarget = "ASSETS"
+                                    editTextValue = assetsTitle
+                                    showEditDialog = true
+                                },
+                                onOpenAll = {
+                                    viewModel.loadUrl("https://drive.google.com")
+                                    viewModel.showMessage("Opening Assets Apps...")
+                                },
+                                onAppClick = { url -> viewModel.loadUrl(url) },
                                 modifier = Modifier.weight(1f)
                             )
                         }
@@ -204,235 +431,15 @@ fun CreatorDashboardView(
                 }
             }
 
-            // 3. Quick Access Circular Shortcuts (WhatsApp, YouTube, Spotify, Add New)
+            // 3. Circular Quick Shortcuts (WhatsApp, YouTube, Spotify, Add new)
             item {
                 Surface(
                     shape = RoundedCornerShape(20.dp),
-                    color = CardBackground,
+                    color = GlassCard,
                     border = BorderStroke(1.dp, Color(0xFF2C2754)),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 16.dp, horizontal = 10.dp),
-                        horizontalArrangement = Arrangement.SpaceAround
-                    ) {
-                        NeonCircularShortcut(
-                            name = "WhatsApp",
-                            symbol = "W",
-                            glowColor = NeonGreen,
-                            onClick = { viewModel.loadUrl("https://web.whatsapp.com") }
-                        )
-                        NeonCircularShortcut(
-                            name = "YouTube",
-                            symbol = "Y",
-                            glowColor = Color(0xFFFF0033),
-                            onClick = { viewModel.loadUrl("https://youtube.com") }
-                        )
-                        NeonCircularShortcut(
-                            name = "Spotify",
-                            symbol = "S",
-                            glowColor = Color(0xFF1DB954),
-                            onClick = { viewModel.loadUrl("https://open.spotify.com") }
-                        )
-                        NeonCircularShortcut(
-                            name = "Add new",
-                            symbol = "+",
-                            glowColor = Color(0xFFA855F7),
-                            onClick = { }
-                        )
-                    }
-                }
-            }
-
-            // 4. Two-Column Project Cards Grid
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    ProjectCard(
-                        title = "Github Repo\nRework",
-                        badge = "GH",
-                        accentColor = Color.White,
-                        modifier = Modifier.weight(1f),
-                        onClick = { viewModel.loadUrl("https://github.com") }
-                    )
-                    ProjectCard(
-                        title = "Figma\nWireframes",
-                        badge = "FG",
-                        accentColor = NeonPink,
-                        modifier = Modifier.weight(1f),
-                        onClick = { viewModel.loadUrl("https://figma.com") }
-                    )
-                }
-            }
-
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    ProjectCard(
-                        title = "Unsplash Curated\nPhotos",
-                        badge = "UN",
-                        accentColor = NeonCyan,
-                        modifier = Modifier.weight(1f),
-                        onClick = { viewModel.loadUrl("https://unsplash.com") }
-                    )
-                    ProjectCard(
-                        title = "Notion Content\nCalendar",
-                        badge = "NO",
-                        accentColor = Color(0xFFE2E8F0),
-                        modifier = Modifier.weight(1f),
-                        onClick = { viewModel.loadUrl("https://notion.so") }
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun FolderChip(
-    title: String,
-    borderColor: Color,
-    icons: List<String>,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        shape = RoundedCornerShape(12.dp),
-        color = Color(0xFF0F0E24),
-        border = BorderStroke(1.dp, borderColor.copy(alpha = 0.7f)),
-        modifier = modifier
-    ) {
-        Column(
-            modifier = Modifier.padding(6.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = title,
-                fontSize = 9.sp,
-                color = borderColor,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(6.dp))
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(3.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                icons.forEach { iconLetter ->
-                    Surface(
-                        shape = RoundedCornerShape(4.dp),
-                        color = Color(0xFF1F1D3D),
-                        modifier = Modifier.size(16.dp)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Text(
-                                text = iconLetter,
-                                fontSize = 8.sp,
-                                color = Color.White,
-                                fontWeight = FontWeight.Black
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun NeonCircularShortcut(
-    name: String,
-    symbol: String,
-    glowColor: Color,
-    onClick: () -> Unit
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(6.dp),
-        modifier = Modifier.clickable { onClick() }
-    ) {
-        Surface(
-            shape = CircleShape,
-            color = Color(0xFF171533),
-            border = BorderStroke(2.dp, glowColor),
-            modifier = Modifier.size(54.dp)
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                Text(
-                    text = symbol,
-                    color = glowColor,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
-        Text(
-            text = name,
-            color = Color(0xFFC7C5E0),
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Medium
-        )
-    }
-}
-
-@Composable
-fun ProjectCard(
-    title: String,
-    badge: String,
-    accentColor: Color,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) {
-    Surface(
-        shape = RoundedCornerShape(16.dp),
-        color = CardBackground,
-        border = BorderStroke(1.dp, Color(0xFF2E2A54)),
-        modifier = modifier
-            .height(64.dp)
-            .clickable { onClick() }
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Surface(
-                shape = CircleShape,
-                color = Color(0xFF221F45),
-                border = BorderStroke(1.dp, accentColor.copy(alpha = 0.5f)),
-                modifier = Modifier.size(32.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Text(
-                        text = badge,
-                        color = accentColor,
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-            Text(
-                text = title,
-                color = Color.White,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Medium,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                lineHeight = 13.sp,
-                modifier = Modifier.weight(1f)
-            )
-            Icon(
-                imageVector = Icons.Default.Edit,
-                contentDescription = null,
-                tint = Color(0xFF75719B),
-                modifier = Modifier.size(14.dp)
-            )
-        }
-    }
-}
+ 
