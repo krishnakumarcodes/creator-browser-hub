@@ -1,28 +1,25 @@
 package com.example.ui.components
 
-import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -30,233 +27,315 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.viewmodel.BrowserViewModel
 
-// 🔮 असली साइबरपंक / नियॉन कलर पैलेट
-val CyberBgDark = Color(0xFF07040D)
-val CyberGlassBg = Color(0xCC140E24)
-val NeonPink = Color(0xFFFF2A85)
-val NeonPurple = Color(0xFFBD00FF)
-val NeonCyan = Color(0xFF00F0FF)
-val NeonOrange = Color(0xFFFF9900)
-val NeonGreen = Color(0xFF00FF66)
-val TextMuted = Color(0xFF8E8EA0)
+// Neon & Cyber Theme Palette
+val CyberBackground = Color(0xFF070714)
+val CardBackground = Color(0xFF13132B).copy(alpha = 0.85f)
+val NeonPurpleBorder = Color(0xFFA855F7)
+val NeonPink = Color(0xFFEC4899)
+val NeonCyan = Color(0xFF06B6D4)
+val NeonGreen = Color(0xFF10B981)
+val NeonOrange = Color(0xFFF97316)
+val GlowCardBg = Color(0xFF1A1635)
 
 @Composable
 fun CreatorDashboardView(
-    modifier: Modifier = Modifier,
-    viewModel: BrowserViewModel? = null,
-    onNavigateToUrl: (String) -> Unit = { url -> viewModel?.loadUrl(url) },
-    isDark: Boolean = isSystemInDarkTheme()
+    viewModel: BrowserViewModel,
+    modifier: Modifier = Modifier
 ) {
-    val scrollState = rememberScrollState()
+    var searchQuery by remember { mutableStateOf("") }
 
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(CyberBgDark)
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFF0B0820),
+                        Color(0xFF050510),
+                        Color(0xFF090A1A)
+                    )
+                )
+            )
     ) {
-        // 1. बैकग्राउंड साइबर सर्किट लाइन्स (Circuit Wallpaper Effect)
-        CyberCircuitBackground()
-
-        // 2. मुख्य स्क्रोल करने योग्य कंटेंट
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(scrollState)
-                .padding(horizontal = 14.dp, vertical = 12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(horizontal = 16.dp),
+            contentPadding = PaddingValues(top = 16.dp, bottom = 90.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // [A] टॉप Creator Nexus कार्ड (तीनों फोल्डर सहित)
-            CreatorNexusMasterCard()
+            // 1. Cyber Search Bar
+            item {
+                Surface(
+                    shape = RoundedCornerShape(26.dp),
+                    color = Color(0xFF161530).copy(alpha = 0.9f),
+                    border = BorderStroke(
+                        1.5.dp,
+                        Brush.horizontalGradient(
+                            listOf(Color(0xFF8B5CF6), Color(0xFFEC4899), Color(0xFF06B6D4))
+                        )
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(54.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Surface(
+                            shape = CircleShape,
+                            color = Color(0xFF232247),
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Text(
+                                    text = "G",
+                                    color = Color(0xFF4285F4),
+                                    fontWeight = FontWeight.Black,
+                                    fontSize = 16.sp
+                                )
+                            }
+                        }
+                        Icon(
+                            imageVector = Icons.Default.ArrowDropDown,
+                            contentDescription = null,
+                            tint = Color.Gray,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Search Web...",
+                            color = Color(0xFF8E8EA8),
+                            fontSize = 15.sp,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Icon(
+                            imageVector = Icons.Default.Mic,
+                            contentDescription = "Voice Search",
+                            tint = Color.White,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+                }
+            }
 
-            Spacer(modifier = Modifier.height(18.dp))
+            // 2. Creator Nexus Dashboard Main Card
+            item {
+                Surface(
+                    shape = RoundedCornerShape(22.dp),
+                    color = GlowCardBg.copy(alpha = 0.9f),
+                    border = BorderStroke(
+                        1.5.dp,
+                        Brush.linearGradient(
+                            listOf(Color(0xFF9333EA), Color(0xFF06B6D4), Color(0xFFEC4899))
+                        )
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(18.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Text(
+                            text = "Creator Nexus",
+                            color = Color.White,
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.2.sp
+                        )
 
-            // [B] 4 नियॉन सर्कल्स (WhatsApp, YouTube, Spotify, Add new)
-            NeonAppsHorizontalBar(onNavigateToUrl = onNavigateToUrl)
+                        Text(
+                            text = "DAILY CREATION FLOW: 4.2 HRS",
+                            color = NeonPink,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 0.8.sp
+                        )
 
-            Spacer(modifier = Modifier.height(18.dp))
+                        Text(
+                            text = "PROJECTS ACTIVE: 3",
+                            color = NeonCyan,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 0.8.sp
+                        )
 
-            // [C] 2x2 कैप्सूल टास्क कार्ड्स (Pill Shape)
-            PillTaskCardsGrid2x2(onNavigateToUrl = onNavigateToUrl)
+                        Text(
+                            text = "INSPIRATION BLOCKS CLEARED: 12",
+                            color = NeonGreen,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 0.8.sp
+                        )
 
-            Spacer(modifier = Modifier.height(30.dp))
-        }
-    }
-}
+                        Spacer(modifier = Modifier.height(6.dp))
 
-// 🌐 बैकग्राउंड साइबर सर्किट (इमेज 2 जैसा लुक देने के लिए)
-@Composable
-private fun CyberCircuitBackground() {
-    Canvas(modifier = Modifier.fillMaxSize()) {
-        val w = size.width
-        val h = size.height
+                        // Category Folders (WORKSPACE, COMMUNITY, ASSETS)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            FolderChip(
+                                title = "WORKSPACE",
+                                borderColor = NeonPurpleBorder,
+                                icons = listOf("F", "N", "V"),
+                                modifier = Modifier.weight(1f)
+                            )
+                            FolderChip(
+                                title = "COMMUNITY",
+                                borderColor = NeonCyan,
+                                icons = listOf("D", "S", "G"),
+                                modifier = Modifier.weight(1f)
+                            )
+                            FolderChip(
+                                title = "ASSETS",
+                                borderColor = NeonOrange,
+                                icons = listOf("D", "B", "C"),
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+                }
+            }
 
-        // बैकग्राउंड पर्पल और सियान ग्लो सर्कल्स
-        drawCircle(
-            brush = Brush.radialGradient(
-                colors = listOf(NeonPurple.copy(alpha = 0.22f), Color.Transparent),
-                center = Offset(w * 0.2f, h * 0.25f),
-                radius = 450f
-            )
-        )
-        drawCircle(
-            brush = Brush.radialGradient(
-                colors = listOf(NeonCyan.copy(alpha = 0.18f), Color.Transparent),
-                center = Offset(w * 0.8f, h * 0.55f),
-                radius = 400f
-            )
-        )
+            // 3. Quick Access Circular Shortcuts (WhatsApp, YouTube, Spotify, Add New)
+            item {
+                Surface(
+                    shape = RoundedCornerShape(20.dp),
+                    color = CardBackground,
+                    border = BorderStroke(1.dp, Color(0xFF2C2754)),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 16.dp, horizontal = 10.dp),
+                        horizontalArrangement = Arrangement.SpaceAround
+                    ) {
+                        NeonCircularShortcut(
+                            name = "WhatsApp",
+                            symbol = "W",
+                            glowColor = NeonGreen,
+                            onClick = { viewModel.loadUrl("https://web.whatsapp.com") }
+                        )
+                        NeonCircularShortcut(
+                            name = "YouTube",
+                            symbol = "Y",
+                            glowColor = Color(0xFFFF0033),
+                            onClick = { viewModel.loadUrl("https://youtube.com") }
+                        )
+                        NeonCircularShortcut(
+                            name = "Spotify",
+                            symbol = "S",
+                            glowColor = Color(0xFF1DB954),
+                            onClick = { viewModel.loadUrl("https://open.spotify.com") }
+                        )
+                        NeonCircularShortcut(
+                            name = "Add new",
+                            symbol = "+",
+                            glowColor = Color(0xFFA855F7),
+                            onClick = { }
+                        )
+                    }
+                }
+            }
 
-        // सर्किट ग्रिड लाइन्स और नोड्स
-        val lineColor = NeonCyan.copy(alpha = 0.08f)
-        drawLine(lineColor, Offset(w * 0.1f, 0f), Offset(w * 0.1f, h), strokeWidth = 1f)
-        drawLine(lineColor, Offset(w * 0.9f, 0f), Offset(w * 0.9f, h), strokeWidth = 1f)
-        drawLine(lineColor, Offset(0f, h * 0.35f), Offset(w, h * 0.35f), strokeWidth = 1f)
-        drawLine(lineColor, Offset(0f, h * 0.65f), Offset(w, h * 0.65f), strokeWidth = 1f)
+            // 4. Two-Column Project Cards Grid
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    ProjectCard(
+                        title = "Github Repo\nRework",
+                        badge = "GH",
+                        accentColor = Color.White,
+                        modifier = Modifier.weight(1f),
+                        onClick = { viewModel.loadUrl("https://github.com") }
+                    )
+                    ProjectCard(
+                        title = "Figma\nWireframes",
+                        badge = "FG",
+                        accentColor = NeonPink,
+                        modifier = Modifier.weight(1f),
+                        onClick = { viewModel.loadUrl("https://figma.com") }
+                    )
+                }
+            }
 
-        // कोने के सर्किट नोड्स
-        drawCircle(NeonPurple.copy(alpha = 0.25f), radius = 6f, center = Offset(w * 0.1f, h * 0.35f))
-        drawCircle(NeonCyan.copy(alpha = 0.25f), radius = 6f, center = Offset(w * 0.9f, h * 0.65f))
-    }
-}
-
-// [A] टॉप Creator Nexus कार्ड
-@Composable
-private fun CreatorNexusMasterCard() {
-    val multiGradientBorder = Brush.sweepGradient(
-        listOf(NeonPurple, NeonCyan, NeonPink, NeonPurple)
-    )
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .shadow(16.dp, RoundedCornerShape(28.dp), ambientColor = NeonPurple, spotColor = NeonCyan)
-            .clip(RoundedCornerShape(28.dp))
-            .background(CyberGlassBg)
-            .border(2.dp, multiGradientBorder, RoundedCornerShape(28.dp))
-            .padding(18.dp)
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = "Creator Nexus",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = Color.White,
-                letterSpacing = 1.5.sp
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text(
-                text = "DAILY CREATION FLOW: 4.2 HRS",
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
-                color = NeonPink,
-                letterSpacing = 0.8.sp
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "PROJECTS ACTIVE: 3",
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
-                color = NeonCyan,
-                letterSpacing = 0.8.sp
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "INSPIRATION BLOCKS CLEARED: 12",
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
-                color = NeonGreen,
-                letterSpacing = 0.8.sp
-            )
-
-            Spacer(modifier = Modifier.height(18.dp))
-
-            // तीन फोल्डर्स: WORKSPACE, COMMUNITY, ASSETS
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                FolderItemBox(
-                    title = "WORKSPACE",
-                    borderColor = NeonPurple,
-                    icons = listOf("F", "N", "VS"),
-                    modifier = Modifier.weight(1f)
-                )
-                FolderItemBox(
-                    title = "COMMUNITY",
-                    borderColor = NeonCyan,
-                    icons = listOf("D", "S", "GH"),
-                    modifier = Modifier.weight(1f)
-                )
-                FolderItemBox(
-                    title = "ASSETS",
-                    borderColor = NeonOrange,
-                    icons = listOf("▲", "📦", "◎"),
-                    modifier = Modifier.weight(1f)
-                )
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    ProjectCard(
+                        title = "Unsplash Curated\nPhotos",
+                        badge = "UN",
+                        accentColor = NeonCyan,
+                        modifier = Modifier.weight(1f),
+                        onClick = { viewModel.loadUrl("https://unsplash.com") }
+                    )
+                    ProjectCard(
+                        title = "Notion Content\nCalendar",
+                        badge = "NO",
+                        accentColor = Color(0xFFE2E8F0),
+                        modifier = Modifier.weight(1f),
+                        onClick = { viewModel.loadUrl("https://notion.so") }
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-private fun FolderItemBox(
+fun FolderChip(
     title: String,
     borderColor: Color,
     icons: List<String>,
     modifier: Modifier = Modifier
 ) {
-    Box(
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = Color(0xFF0F0E24),
+        border = BorderStroke(1.dp, borderColor.copy(alpha = 0.7f)),
         modifier = modifier
-            .shadow(8.dp, RoundedCornerShape(18.dp), spotColor = borderColor)
-            .clip(RoundedCornerShape(18.dp))
-            .background(Color(0xE60E0B1A))
-            .border(1.5.dp, borderColor, RoundedCornerShape(18.dp))
-            .padding(vertical = 10.dp, horizontal = 6.dp)
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            modifier = Modifier.padding(6.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = title,
+                fontSize = 9.sp,
+                color = borderColor,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(6.dp))
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = title,
-                    fontSize = 9.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = borderColor
-                )
-                Spacer(modifier = Modifier.width(3.dp))
-                Icon(
-                    imageVector = Icons.Default.Edit,
-                    contentDescription = null,
-                    tint = borderColor,
-                    modifier = Modifier.size(10.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
+                horizontalArrangement = Arrangement.spacedBy(3.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                icons.forEach { iconText ->
-                    Box(
-                        modifier = Modifier
-                            .size(26.dp)
-                            .clip(RoundedCornerShape(7.dp))
-                            .background(Color(0xFF221A38))
-                            .border(0.5.dp, borderColor.copy(alpha = 0.4f), RoundedCornerShape(7.dp)),
-                        contentAlignment = Alignment.Center
+                icons.forEach { iconLetter ->
+                    Surface(
+                        shape = RoundedCornerShape(4.dp),
+                        color = Color(0xFF1F1D3D),
+                        modifier = Modifier.size(16.dp)
                     ) {
-                        Text(
-                            text = iconText,
-                            fontSize = 9.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(
+                                text = iconLetter,
+                                fontSize = 8.sp,
+                                color = Color.White,
+                                fontWeight = FontWeight.Black
+                            )
+                        }
                     }
                 }
             }
@@ -264,57 +343,8 @@ private fun FolderItemBox(
     }
 }
 
-// [B] चार नियॉन राउंड शॉर्टकट्स (ग्लास कंटेनर में)
 @Composable
-private fun NeonAppsHorizontalBar(onNavigateToUrl: (String) -> Unit) {
-    val barBorder = Brush.horizontalGradient(
-        listOf(NeonPurple.copy(alpha = 0.7f), NeonCyan.copy(alpha = 0.7f))
-    )
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .shadow(12.dp, RoundedCornerShape(26.dp), ambientColor = NeonCyan)
-            .clip(RoundedCornerShape(26.dp))
-            .background(CyberGlassBg)
-            .border(1.8.dp, barBorder, RoundedCornerShape(26.dp))
-            .padding(vertical = 14.dp, horizontal = 10.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceAround,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            NeonRoundApp(
-                name = "WhatsApp",
-                symbol = "W",
-                glowColor = NeonGreen,
-                onClick = { onNavigateToUrl("https://web.whatsapp.com") }
-            )
-            NeonRoundApp(
-                name = "YouTube",
-                symbol = "▶",
-                glowColor = Color(0xFFFF0033),
-                onClick = { onNavigateToUrl("https://www.youtube.com") }
-            )
-            NeonRoundApp(
-                name = "Spotify",
-                symbol = "≈",
-                glowColor = Color(0xFF1DB954),
-                onClick = { onNavigateToUrl("https://open.spotify.com") }
-            )
-            NeonRoundApp(
-                name = "Add new",
-                symbol = "+",
-                glowColor = NeonPurple,
-                onClick = { /* New shortcut */ }
-            )
-        }
-    }
-}
-
-@Composable
-private fun NeonRoundApp(
+fun NeonCircularShortcut(
     name: String,
     symbol: String,
     glowColor: Color,
@@ -322,149 +352,86 @@ private fun NeonRoundApp(
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(6.dp),
         modifier = Modifier.clickable { onClick() }
     ) {
-        Box(
-            modifier = Modifier
-                .size(56.dp)
-                .shadow(12.dp, CircleShape, spotColor = glowColor)
-                .clip(CircleShape)
-                .background(Color(0xFF0F0B1E))
-                .border(2.5.dp, glowColor, CircleShape),
-            contentAlignment = Alignment.Center
+        Surface(
+            shape = CircleShape,
+            color = Color(0xFF171533),
+            border = BorderStroke(2.dp, glowColor),
+            modifier = Modifier.size(54.dp)
         ) {
-            Text(
-                text = symbol,
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
-                color = glowColor
-            )
+            Box(contentAlignment = Alignment.Center) {
+                Text(
+                    text = symbol,
+                    color = glowColor,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
-        Spacer(modifier = Modifier.height(7.dp))
         Text(
             text = name,
+            color = Color(0xFFC7C5E0),
             fontSize = 11.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = Color.White
+            fontWeight = FontWeight.Medium
         )
     }
 }
 
-// [C] 2x2 कैप्सूल टास्क कार्ड्स (Pill Shape — 100% Round Borders)
 @Composable
-private fun PillTaskCardsGrid2x2(onNavigateToUrl: (String) -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            PillTaskCard(
-                title = "Github Repo",
-                subtitle = "Rework",
-                symbol = "GH",
-                borderColor = NeonCyan,
-                modifier = Modifier.weight(1f),
-                onClick = { onNavigateToUrl("https://github.com/krishnakumarcodes") }
-            )
-            PillTaskCard(
-                title = "Figma",
-                subtitle = "Wireframes",
-                symbol = "F",
-                borderColor = NeonPurple,
-                modifier = Modifier.weight(1f),
-                onClick = { onNavigateToUrl("https://www.figma.com") }
-            )
-        }
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            PillTaskCard(
-                title = "Unsplash Curated",
-                subtitle = "Photos",
-                symbol = "U",
-                borderColor = NeonGreen,
-                modifier = Modifier.weight(1f),
-                onClick = { onNavigateToUrl("https://unsplash.com") }
-            )
-            PillTaskCard(
-                title = "Notion Content",
-                subtitle = "Calendar",
-                symbol = "N",
-                borderColor = NeonOrange,
-                modifier = Modifier.weight(1f),
-                onClick = { onNavigateToUrl("https://www.notion.so") }
-            )
-        }
-    }
-}
-
-@Composable
-private fun PillTaskCard(
+fun ProjectCard(
     title: String,
-    subtitle: String,
-    symbol: String,
-    borderColor: Color,
+    badge: String,
+    accentColor: Color,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-    // पूर्ण कैप्सूल शेप (CircleShape / 50% radius)
-    Box(
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = CardBackground,
+        border = BorderStroke(1.dp, Color(0xFF2E2A54)),
         modifier = modifier
-            .shadow(10.dp, CircleShape, spotColor = borderColor)
-            .clip(CircleShape)
-            .background(CyberGlassBg)
-            .border(1.8.dp, borderColor, CircleShape)
+            .height(64.dp)
             .clickable { onClick() }
-            .padding(horizontal = 14.dp, vertical = 10.dp)
     ) {
         Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.fillMaxWidth()
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // गोल सिंबल बॉक्स
-            Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFF0F0B1E))
-                    .border(1.2.dp, borderColor, CircleShape),
-                contentAlignment = Alignment.Center
+            Surface(
+                shape = CircleShape,
+                color = Color(0xFF221F45),
+                border = BorderStroke(1.dp, accentColor.copy(alpha = 0.5f)),
+                modifier = Modifier.size(32.dp)
             ) {
-                Text(
-                    text = symbol,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = borderColor
-                )
+                Box(contentAlignment = Alignment.Center) {
+                    Text(
+                        text = badge,
+                        color = accentColor,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = subtitle,
-                    fontSize = 9.sp,
-                    fontWeight = FontWeight.Normal,
-                    color = TextMuted,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-
+            Text(
+                text = title,
+                color = Color.White,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Medium,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                lineHeight = 13.sp,
+                modifier = Modifier.weight(1f)
+            )
             Icon(
                 imageVector = Icons.Default.Edit,
                 contentDescription = null,
-                tint = borderColor.copy(alpha = 0.7f),
-                modifier = Modifier.size(13.dp)
+                tint = Color(0xFF75719B),
+                modifier = Modifier.size(14.dp)
             )
         }
     }
