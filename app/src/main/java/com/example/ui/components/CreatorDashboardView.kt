@@ -34,13 +34,6 @@ val NeonGreenColor = Color(0xFF10B981)
 val NeonPurpleColor = Color(0xFFA855F7)
 val NeonOrangeColor = Color(0xFFF97316)
 
-data class FolderGroup(
-    val id: String,
-    var title: String,
-    val borderColor: Color,
-    val apps: MutableList<Pair<String, String>> // Name to URL
-)
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CreatorDashboardView(
@@ -49,9 +42,8 @@ fun CreatorDashboardView(
 ) {
     var showSearchEngineMenu by remember { mutableStateOf(false) }
     var selectedSearchEngine by remember { mutableStateOf("Google") }
-    var searchQueryText by remember { mutableStateOf("") }
 
-    // Folder States
+    // Folder Names
     var workspaceTitle by remember { mutableStateOf("WORKSPACE") }
     var communityTitle by remember { mutableStateOf("COMMUNITY") }
     var assetsTitle by remember { mutableStateOf("ASSETS") }
@@ -73,7 +65,6 @@ fun CreatorDashboardView(
         )
     }
 
-    // Add Shortcut Dialog
     var showAddDialog by remember { mutableStateOf(false) }
     var newName by remember { mutableStateOf("") }
     var newUrl by remember { mutableStateOf("") }
@@ -103,6 +94,11 @@ fun CreatorDashboardView(
                             "WORKSPACE" -> workspaceTitle = editTextValue
                             "COMMUNITY" -> communityTitle = editTextValue
                             "ASSETS" -> assetsTitle = editTextValue
+                            else -> {
+                                customShortcuts = customShortcuts.map {
+                                    if (it.first == editingTarget) Triple(editTextValue, it.second, it.third) else it
+                                }
+                            }
                         }
                         showEditDialog = false
                     },
@@ -145,7 +141,8 @@ fun CreatorDashboardView(
                     onClick = {
                         if (newName.isNotBlank() && newUrl.isNotBlank()) {
                             val cleanUrl = if (newUrl.startsWith("http")) newUrl else "https://$newUrl"
-                            customShortcuts = customShortcuts + Triple(newName, newName.take(2).uppercase(), cleanUrl)
+                            val badge = if (newName.length >= 2) newName.take(2).uppercase() else newName.uppercase()
+                            customShortcuts = customShortcuts + Triple(newName, badge, cleanUrl)
                             newName = ""
                             newUrl = ""
                             showAddDialog = false
@@ -202,7 +199,6 @@ fun CreatorDashboardView(
                             .padding(horizontal = 14.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // G Badge (Single Tap opens default engine search, Dropdown changes engine)
                         Surface(
                             shape = CircleShape,
                             color = Color(0xFF23224C),
@@ -228,7 +224,6 @@ fun CreatorDashboardView(
                             }
                         }
 
-                        // Triangle Dropdown Arrow (Opens Engine Selector)
                         Box {
                             IconButton(
                                 onClick = { showSearchEngineMenu = true },
@@ -299,7 +294,6 @@ fun CreatorDashboardView(
                                 }
                         )
 
-                        // Voice Search Mic Icon
                         Icon(
                             imageVector = Icons.Default.Mic,
                             contentDescription = "Voice Search",
@@ -385,7 +379,7 @@ fun CreatorDashboardView(
                                 },
                                 onOpenAll = {
                                     viewModel.loadUrl("https://figma.com")
-                                    viewModel.showMessage("Opening Workspace Apps...")
+                                    viewModel.showMessage("Opening Workspace...")
                                 },
                                 onAppClick = { url -> viewModel.loadUrl(url) },
                                 modifier = Modifier.weight(1f)
@@ -403,7 +397,7 @@ fun CreatorDashboardView(
                                 },
                                 onOpenAll = {
                                     viewModel.loadUrl("https://discord.com")
-                                    viewModel.showMessage("Opening Community Apps...")
+                                    viewModel.showMessage("Opening Community...")
                                 },
                                 onAppClick = { url -> viewModel.loadUrl(url) },
                                 modifier = Modifier.weight(1f)
@@ -421,7 +415,7 @@ fun CreatorDashboardView(
                                 },
                                 onOpenAll = {
                                     viewModel.loadUrl("https://drive.google.com")
-                                    viewModel.showMessage("Opening Assets Apps...")
+                                    viewModel.showMessage("Opening Assets...")
                                 },
                                 onAppClick = { url -> viewModel.loadUrl(url) },
                                 modifier = Modifier.weight(1f)
@@ -442,4 +436,5 @@ fun CreatorDashboardView(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
- 
+                            .padding(vertical = 14.dp, horizontal = 8.dp),
+                        ho
