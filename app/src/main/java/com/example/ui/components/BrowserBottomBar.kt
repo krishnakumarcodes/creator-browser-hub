@@ -6,22 +6,24 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.BrowserTab
-import com.example.ui.theme.*
 import com.example.viewmodel.BrowserViewModel
+
+val BottomBarBg = Color(0xFF110E28).copy(alpha = 0.95f)
+val BottomBorder = Color(0xFF2A2355)
+val IconActiveColor = Color(0xFFC084FC)
+val IconInactiveColor = Color(0xFF7E7A9E)
 
 @Composable
 fun BrowserBottomBar(
@@ -30,179 +32,78 @@ fun BrowserBottomBar(
     viewModel: BrowserViewModel,
     modifier: Modifier = Modifier
 ) {
-    val showMoreMenu by viewModel.showMoreMenu.collectAsState()
-
     Surface(
         modifier = modifier.fillMaxWidth(),
-        color = DarkSurface,
-        tonalElevation = 6.dp,
-        border = BorderStroke(1.dp, DarkBorder)
+        color = BottomBarBg,
+        border = BorderStroke(1.dp, BottomBorder)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .navigationBarsPadding()
-                .padding(horizontal = 8.dp, vertical = 6.dp),
-            horizontalArrangement = Arrangement.SpaceAround,
+                .padding(vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 1. Back Button
-            IconButton(
-                onClick = { viewModel.goBack() },
-                enabled = tab.canGoBack || !tab.isHome,
-                modifier = Modifier.testTag("nav_back_button")
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = if (tab.canGoBack || !tab.isHome) TextPrimary else TextMuted
-                )
-            }
-
-            // 2. Forward Button
-            IconButton(
-                onClick = { viewModel.goForward() },
-                enabled = tab.canGoForward,
-                modifier = Modifier.testTag("nav_forward_button")
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = "Forward",
-                    tint = if (tab.canGoForward) TextPrimary else TextMuted
-                )
-            }
-
-            // 3. Home Dashboard Button
-            IconButton(
-                onClick = { viewModel.navigateHome() },
-                modifier = Modifier.testTag("nav_home_button")
-            ) {
-                Icon(
-                    imageVector = if (tab.isHome) Icons.Filled.Dashboard else Icons.Outlined.Dashboard,
-                    contentDescription = "Home",
-                    tint = if (tab.isHome) CreatorVioletLight else TextPrimary
-                )
-            }
-
-            // 4. Tabs Counter Button
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(DarkSurfaceElevated)
-                    .clickable { viewModel.setShowTabOverview(true) }
-                    .testTag("tabs_overview_button")
-            ) {
-                Text(
-                    text = tabCount.toString(),
-                    color = CreatorVioletLight,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 13.sp
-                )
-            }
-
-            // 5. Three-Dots Menu (⋮)
-            Box {
-                IconButton(
-                    onClick = { viewModel.setShowMoreMenu(true) },
-                    modifier = Modifier.testTag("nav_menu_button")
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.MoreVert,
-                        contentDescription = "Options",
-                        tint = TextPrimary
-                    )
-                }
-
-                DropdownMenu(
-                    expanded = showMoreMenu,
-                    onDismissRequest = { viewModel.setShowMoreMenu(false) },
-                    modifier = Modifier.background(DarkSurfaceElevated)
-                ) {
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                text = if (tab.isDesktopMode) "Switch to Mobile Site" else "Request Desktop Site",
-                                color = TextPrimary
-                            )
-                        },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = if (tab.isDesktopMode) Icons.Default.Smartphone else Icons.Default.Computer,
-                                contentDescription = null,
-                                tint = CreatorVioletLight
-                            )
-                        },
-                        onClick = {
-                            viewModel.setShowMoreMenu(false)
-                            viewModel.toggleDesktopMode()
-                        }
-                    )
-
-                    DropdownMenuItem(
-                        text = { Text("Bookmarks & History", color = TextPrimary) },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Bookmarks,
-                                contentDescription = null,
-                                tint = CreatorCyan
-                            )
-                        },
-                        onClick = {
-                            viewModel.setShowMoreMenu(false)
-                            viewModel.setShowBookmarksHistory(true)
-                        }
-                    )
-
-                    DropdownMenuItem(
-                        text = { Text("Creator Quick Notes", color = TextPrimary) },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.EditNote,
-                                contentDescription = null,
-                                tint = CreatorRose
-                            )
-                        },
-                        onClick = {
-                            viewModel.setShowMoreMenu(false)
-                            viewModel.setShowNotesDrawer(true)
-                        }
-                    )
-
-                    DropdownMenuItem(
-                        text = { Text("Local Security & Storage", color = TextPrimary) },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Security,
-                                contentDescription = null,
-                                tint = CreatorGreen
-                            )
-                        },
-                        onClick = {
-                            viewModel.setShowMoreMenu(false)
-                            viewModel.setShowSecurityDialog(true)
-                        }
-                    )
-
-                    HorizontalDivider(color = DarkBorder, modifier = Modifier.padding(vertical = 4.dp))
-
-                    DropdownMenuItem(
-                        text = { Text("Clear Cache & Cookies", color = CreatorRoseLight) },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.DeleteOutline,
-                                contentDescription = null,
-                                tint = CreatorRose
-                            )
-                        },
-                        onClick = {
-                            viewModel.setShowMoreMenu(false)
-                            viewModel.clearCacheAndCookies()
-                        }
-                    )
-                }
-            }
+            BottomNavItem(
+                icon = Icons.Filled.Home,
+                label = "Home",
+                isSelected = tab.isHome,
+                onClick = { viewModel.navigateHome() }
+            )
+            BottomNavItem(
+                icon = Icons.Outlined.BookmarkBorder,
+                label = "Bookmark",
+                isSelected = false,
+                onClick = { viewModel.setShowBookmarksHistory(true) }
+            )
+            BottomNavItem(
+                icon = Icons.Default.Search,
+                label = "Search",
+                isSelected = false,
+                onClick = { viewModel.navigateHome() }
+            )
+            BottomNavItem(
+                icon = Icons.Default.Filter1,
+                label = "Tabs ($tabCount)",
+                isSelected = false,
+                onClick = { viewModel.setShowTabOverview(true) }
+            )
+            BottomNavItem(
+                icon = Icons.Outlined.Settings,
+                label = "Settings",
+                isSelected = false,
+                onClick = { viewModel.setShowMoreMenu(true) }
+            )
         }
+    }
+}
+
+@Composable
+fun BottomNavItem(
+    icon: ImageVector,
+    label: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = Modifier
+            .clickable { onClick() }
+            .padding(horizontal = 8.dp)
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = label,
+            tint = if (isSelected) IconActiveColor else IconInactiveColor,
+            modifier = Modifier.size(22.dp)
+        )
+        Text(
+            text = label,
+            color = if (isSelected) IconActiveColor else IconInactiveColor,
+            fontSize = 10.sp,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+        )
     }
 }
