@@ -6,15 +6,42 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,14 +54,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.viewmodel.BrowserViewModel
 
-// Neon Glow Palette
+// Neon Glow Colors
 val GlowDarkBg = Color(0xFF090A16)
-val GlassCard = Color(0xFF13152C).copy(alpha = 0.92f)
+val GlassCard = Color(0xFF13152C)
 val NeonPinkColor = Color(0xFFEC4899)
 val NeonCyanColor = Color(0xFF06B6D4)
 val NeonGreenColor = Color(0xFF10B981)
 val NeonPurpleColor = Color(0xFFA855F7)
 val NeonOrangeColor = Color(0xFFF97316)
+
+data class ShortcutItem(
+    val title: String,
+    val badge: String,
+    val url: String
+)
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -60,10 +93,10 @@ fun CreatorDashboardView(
     var customShortcuts by remember {
         mutableStateOf(
             listOf(
-                Triple("Github Repo\nRework", "GH", "https://github.com"),
-                Triple("Figma\nWireframes", "FG", "https://figma.com"),
-                Triple("Unsplash Curated\nPhotos", "UN", "https://unsplash.com"),
-                Triple("Notion Content\nCalendar", "NO", "https://notion.so")
+                ShortcutItem("Github Repo Rework", "GH", "https://github.com"),
+                ShortcutItem("Figma Wireframes", "FG", "https://figma.com"),
+                ShortcutItem("Unsplash Curated Photos", "UN", "https://unsplash.com"),
+                ShortcutItem("Notion Content Calendar", "NO", "https://notion.so")
             )
         )
     }
@@ -93,13 +126,18 @@ fun CreatorDashboardView(
             confirmButton = {
                 Button(
                     onClick = {
-                        when (editingTarget) {
-                            "WORKSPACE" -> workspaceTitle = editTextValue
-                            "COMMUNITY" -> communityTitle = editTextValue
-                            "ASSETS" -> assetsTitle = editTextValue
-                            else -> {
-                                customShortcuts = customShortcuts.map {
-                                    if (it.first == editingTarget) Triple(editTextValue, it.second, it.third) else it
+                        if (editingTarget == "WORKSPACE") {
+                            workspaceTitle = editTextValue
+                        } else if (editingTarget == "COMMUNITY") {
+                            communityTitle = editTextValue
+                        } else if (editingTarget == "ASSETS") {
+                            assetsTitle = editTextValue
+                        } else {
+                            customShortcuts = customShortcuts.map { item ->
+                                if (item.title == editingTarget) {
+                                    item.copy(title = editTextValue)
+                                } else {
+                                    item
                                 }
                             }
                         }
@@ -143,9 +181,9 @@ fun CreatorDashboardView(
                 Button(
                     onClick = {
                         if (newName.isNotBlank() && newUrl.isNotBlank()) {
-                            val cleanUrl = if (newUrl.startsWith("http")) newUrl else "https://$newUrl"
+                            val cleanUrl = if (newUrl.startsWith("http")) newUrl else "https://" + newUrl
                             val badge = if (newName.length >= 2) newName.take(2).uppercase() else newName.uppercase()
-                            customShortcuts = customShortcuts + Triple(newName, badge, cleanUrl)
+                            customShortcuts = customShortcuts + ShortcutItem(newName, badge, cleanUrl)
                             newName = ""
                             newUrl = ""
                             showAddDialog = false
@@ -185,7 +223,7 @@ fun CreatorDashboardView(
             item {
                 Surface(
                     shape = RoundedCornerShape(28.dp),
-                    color = Color(0xFF161533).copy(alpha = 0.95f),
+                    color = Color(0xFF161533),
                     border = BorderStroke(
                         1.5.dp,
                         Brush.horizontalGradient(
@@ -433,4 +471,268 @@ fun CreatorDashboardView(
                 Surface(
                     shape = RoundedCornerShape(20.dp),
                     color = GlassCard,
-         
+                    border = BorderStroke(1.dp, Color(0xFF2C2754)),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 14.dp, horizontal = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceAround
+                    ) {
+                        NeonCircularShortcut(
+                            name = "WhatsApp",
+                            symbol = "W",
+                            glowColor = NeonGreenColor,
+                            onClick = { viewModel.loadUrl("https://web.whatsapp.com") }
+                        )
+                        NeonCircularShortcut(
+                            name = "YouTube",
+                            symbol = "Y",
+                            glowColor = Color(0xFFFF0033),
+                            onClick = { viewModel.loadUrl("https://youtube.com") }
+                        )
+                        NeonCircularShortcut(
+                            name = "Spotify",
+                            symbol = "S",
+                            glowColor = Color(0xFF1DB954),
+                            onClick = { viewModel.loadUrl("https://open.spotify.com") }
+                        )
+                        NeonCircularShortcut(
+                            name = "Add new",
+                            symbol = "+",
+                            glowColor = NeonPurpleColor,
+                            onClick = { showAddDialog = true }
+                        )
+                    }
+                }
+            }
+
+            // 4. Two-Column Project Cards with Isolated Edit Button
+            item {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    customShortcuts.chunked(2).forEach { rowCards ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            rowCards.forEach { card ->
+                                ProjectCardInteractive(
+                                    item = card,
+                                    modifier = Modifier.weight(1f),
+                                    onClick = { viewModel.loadUrl(card.url) },
+                                    onEdit = {
+                                        editingTarget = card.title
+                                        editTextValue = card.title
+                                        showEditDialog = true
+                                    },
+                                    onLongPress = {
+                                        customShortcuts = customShortcuts.filter { it.title != card.title }
+                                        Toast.makeText(context, "Removed " + card.badge, Toast.LENGTH_SHORT).show()
+                                    }
+                                )
+                            }
+                            if (rowCards.size == 1) {
+                                Spacer(modifier = Modifier.weight(1f))
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun InteractiveFolderChip(
+    title: String,
+    borderColor: Color,
+    icons: List<String>,
+    urls: List<String>,
+    onEditName: () -> Unit,
+    onOpenAll: () -> Unit,
+    onAppClick: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = Color(0xFF110E26),
+        border = BorderStroke(1.dp, borderColor),
+        modifier = modifier
+    ) {
+        Column(
+            modifier = Modifier.padding(6.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = title,
+                    fontSize = 9.sp,
+                    color = borderColor,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.width(2.dp))
+                IconButton(
+                    onClick = onEditName,
+                    modifier = Modifier.size(14.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit Folder Name",
+                        tint = borderColor,
+                        modifier = Modifier.size(11.dp)
+                    )
+                }
+                IconButton(
+                    onClick = onOpenAll,
+                    modifier = Modifier.size(16.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowDropDown,
+                        contentDescription = "Open Folder",
+                        tint = borderColor,
+                        modifier = Modifier.size(14.dp)
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                icons.forEachIndexed { index, iconLetter ->
+                    Surface(
+                        shape = RoundedCornerShape(4.dp),
+                        color = Color(0xFF221F45),
+                        modifier = Modifier
+                            .size(18.dp)
+                            .clickable {
+                                if (index < urls.size) {
+                                    onAppClick(urls[index])
+                                }
+                            }
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(
+                                text = iconLetter,
+                                fontSize = 8.sp,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun NeonCircularShortcut(
+    name: String,
+    symbol: String,
+    glowColor: Color,
+    onClick: () -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+        modifier = Modifier.clickable { onClick() }
+    ) {
+        Surface(
+            shape = CircleShape,
+            color = Color(0xFF161432),
+            border = BorderStroke(2.dp, glowColor),
+            modifier = Modifier.size(54.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Text(
+                    text = symbol,
+                    color = glowColor,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+        Text(
+            text = name,
+            color = Color(0xFFC7C5E0),
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun ProjectCardInteractive(
+    item: ShortcutItem,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+    onEdit: () -> Unit,
+    onLongPress: () -> Unit
+) {
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = GlassCard,
+        border = BorderStroke(1.dp, Color(0xFF2D2756)),
+        modifier = modifier
+            .height(64.dp)
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongPress
+            )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Surface(
+                shape = CircleShape,
+                color = Color(0xFF231F46),
+                border = BorderStroke(1.dp, NeonPurpleColor),
+                modifier = Modifier.size(32.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Text(
+                        text = item.badge,
+                        color = Color.White,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+            Text(
+                text = item.title,
+                color = Color.White,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Medium,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                lineHeight = 13.sp,
+                modifier = Modifier.weight(1f)
+            )
+            // Isolated edit button: clicking pencil only opens edit dialog, does NOT trigger card click
+            IconButton(
+                onClick = onEdit,
+                modifier = Modifier.size(24.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = "Edit Name",
+                    tint = Color(0xFF75719B),
+                    modifier = Modifier.size(14.dp)
+                )
+            }
+        }
+    }
+}
