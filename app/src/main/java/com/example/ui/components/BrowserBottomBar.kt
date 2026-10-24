@@ -3,6 +3,7 @@ package com.example.ui.components
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,7 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.viewmodel.BrowserViewModel
 
-// Neon Glow Colors for 3D Floating Bottom Bar
+// Neon Glow Colors for 3D Floating Capsule
 val BottomBarBg = Color(0xFF13152C).copy(alpha = 0.95f)
 val NeonActivePurple = Color(0xFFA855F7)
 val NeonActivePink = Color(0xFFEC4899)
@@ -59,72 +61,35 @@ enum class BottomNavItem(val title: String) {
 
 /**
  * 3D Floating Neon Capsule Bottom Bar
- * Fully compatible with all MainActivity caller signatures
+ * Universal Composable supporting all possible parameter calls from MainActivity
  */
 @Composable
 fun BrowserBottomBar(
-    viewModel: BrowserViewModel,
-    modifier: Modifier = Modifier
-) {
-    var selectedItem by remember { mutableStateOf(BottomNavItem.HOME) }
-
-    BrowserBottomBarLayout(
-        selectedItem = selectedItem,
-        tabCount = 1,
-        onItemSelected = { item ->
-            selectedItem = item
-        },
-        modifier = modifier
-    )
-}
-
-@Composable
-fun BrowserBottomBar(
-    selectedItem: BottomNavItem = BottomNavItem.HOME,
-    onItemSelected: (BottomNavItem) -> Unit = {},
+    modifier: Modifier = Modifier,
+    viewModel: BrowserViewModel? = null,
+    selectedItem: Any? = null,
+    onItemSelected: ((Any) -> Unit)? = null,
+    currentRoute: String = "home",
+    onNavigate: ((String) -> Unit)? = null,
     tabCount: Int = 1,
-    modifier: Modifier = Modifier
+    // Callback overloads
+    onHomeClick: () -> Unit = {},
+    onBookmarkClick: () -> Unit = {},
+    onBookmarksClick: () -> Unit = {},
+    onSearchClick: () -> Unit = {},
+    onTabClick: () -> Unit = {},
+    onTabsClick: () -> Unit = {},
+    onSettingsClick: () -> Unit = {},
+    onMenuClick: () -> Unit = {},
+    onNewTabClick: () -> Unit = {},
+    canGoBack: Boolean = false,
+    canGoForward: Boolean = false,
+    onBackClick: () -> Unit = {},
+    onForwardClick: () -> Unit = {},
+    onRefreshClick: () -> Unit = {}
 ) {
-    BrowserBottomBarLayout(
-        selectedItem = selectedItem,
-        tabCount = tabCount,
-        onItemSelected = onItemSelected,
-        modifier = modifier
-    )
-}
+    var internalSelected by remember { mutableStateOf(BottomNavItem.HOME) }
 
-@Composable
-fun BrowserBottomBar(
-    currentRoute: String,
-    onNavigate: (String) -> Unit,
-    tabCount: Int = 1,
-    modifier: Modifier = Modifier
-) {
-    val activeNav = when (currentRoute.lowercase()) {
-        "bookmark", "bookmarks" -> BottomNavItem.BOOKMARK
-        "search" -> BottomNavItem.SEARCH
-        "tabs", "tab" -> BottomNavItem.TABS
-        "settings", "setting" -> BottomNavItem.SETTINGS
-        else -> BottomNavItem.HOME
-    }
-
-    BrowserBottomBarLayout(
-        selectedItem = activeNav,
-        tabCount = tabCount,
-        onItemSelected = { item ->
-            onNavigate(item.name.lowercase())
-        },
-        modifier = modifier
-    )
-}
-
-@Composable
-fun BrowserBottomBarLayout(
-    selectedItem: BottomNavItem,
-    tabCount: Int,
-    onItemSelected: (BottomNavItem) -> Unit,
-    modifier: Modifier = Modifier
-) {
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -132,7 +97,7 @@ fun BrowserBottomBarLayout(
             .padding(horizontal = 14.dp, vertical = 8.dp),
         contentAlignment = Alignment.Center
     ) {
-        // 3D Floating Capsule Surface with Multi-color Neon Border and Glow Shadow
+        // 3D Floating Capsule Surface
         Surface(
             shape = RoundedCornerShape(28.dp),
             color = BottomBarBg,
@@ -166,9 +131,14 @@ fun BrowserBottomBarLayout(
                 // 1. Home
                 BottomBarItem(
                     label = "Home",
-                    icon = if (selectedItem == BottomNavItem.HOME) Icons.Filled.Home else Icons.Outlined.Home,
-                    isSelected = selectedItem == BottomNavItem.HOME,
-                    onClick = { onItemSelected(BottomNavItem.HOME) },
+                    icon = if (internalSelected == BottomNavItem.HOME) Icons.Filled.Home else Icons.Outlined.Home,
+                    isSelected = internalSelected == BottomNavItem.HOME,
+                    onClick = {
+                        internalSelected = BottomNavItem.HOME
+                        onItemSelected?.invoke(BottomNavItem.HOME)
+                        onNavigate?.invoke("home")
+                        onHomeClick()
+                    },
                     modifier = Modifier.weight(1f)
                 )
 
@@ -176,35 +146,58 @@ fun BrowserBottomBarLayout(
                 BottomBarItem(
                     label = "Bookmark",
                     icon = Icons.Outlined.BookmarkBorder,
-                    isSelected = selectedItem == BottomNavItem.BOOKMARK,
-                    onClick = { onItemSelected(BottomNavItem.BOOKMARK) },
+                    isSelected = internalSelected == BottomNavItem.BOOKMARK,
+                    onClick = {
+                        internalSelected = BottomNavItem.BOOKMARK
+                        onItemSelected?.invoke(BottomNavItem.BOOKMARK)
+                        onNavigate?.invoke("bookmark")
+                        onBookmarkClick()
+                        onBookmarksClick()
+                    },
                     modifier = Modifier.weight(1f)
                 )
 
                 // 3. Search
                 BottomBarItem(
                     label = "Search",
-                    icon = if (selectedItem == BottomNavItem.SEARCH) Icons.Filled.Search else Icons.Outlined.Search,
-                    isSelected = selectedItem == BottomNavItem.SEARCH,
-                    onClick = { onItemSelected(BottomNavItem.SEARCH) },
+                    icon = if (internalSelected == BottomNavItem.SEARCH) Icons.Filled.Search else Icons.Outlined.Search,
+                    isSelected = internalSelected == BottomNavItem.SEARCH,
+                    onClick = {
+                        internalSelected = BottomNavItem.SEARCH
+                        onItemSelected?.invoke(BottomNavItem.SEARCH)
+                        onNavigate?.invoke("search")
+                        onSearchClick()
+                    },
                     modifier = Modifier.weight(1f)
                 )
 
-                // 4. Tabs Badge (Floating Box with Tab Count)
+                // 4. Tabs Badge (3D Square Box)
                 BottomBarTabBadgeItem(
                     label = "Tabs ($tabCount)",
                     tabCount = tabCount,
-                    isSelected = selectedItem == BottomNavItem.TABS,
-                    onClick = { onItemSelected(BottomNavItem.TABS) },
+                    isSelected = internalSelected == BottomNavItem.TABS,
+                    onClick = {
+                        internalSelected = BottomNavItem.TABS
+                        onItemSelected?.invoke(BottomNavItem.TABS)
+                        onNavigate?.invoke("tabs")
+                        onTabClick()
+                        onTabsClick()
+                    },
                     modifier = Modifier.weight(1f)
                 )
 
                 // 5. Settings
                 BottomBarItem(
                     label = "Settings",
-                    icon = if (selectedItem == BottomNavItem.SETTINGS) Icons.Filled.Settings else Icons.Outlined.Settings,
-                    isSelected = selectedItem == BottomNavItem.SETTINGS,
-                    onClick = { onItemSelected(BottomNavItem.SETTINGS) },
+                    icon = if (internalSelected == BottomNavItem.SETTINGS) Icons.Filled.Settings else Icons.Outlined.Settings,
+                    isSelected = internalSelected == BottomNavItem.SETTINGS,
+                    onClick = {
+                        internalSelected = BottomNavItem.SETTINGS
+                        onItemSelected?.invoke(BottomNavItem.SETTINGS)
+                        onNavigate?.invoke("settings")
+                        onSettingsClick()
+                        onMenuClick()
+                    },
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -226,7 +219,11 @@ fun BottomBarItem(
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
-            .clickable(onClick = onClick)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = ripple(bounded = false, radius = 24.dp),
+                onClick = onClick
+            )
             .padding(vertical = 6.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -265,12 +262,15 @@ fun BottomBarTabBadgeItem(
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
-            .clickable(onClick = onClick)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = ripple(bounded = false, radius = 24.dp),
+                onClick = onClick
+            )
             .padding(vertical = 6.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Tab Box Icon (Numbered Square)
         Surface(
             shape = RoundedCornerShape(6.dp),
             color = Color.Transparent,
