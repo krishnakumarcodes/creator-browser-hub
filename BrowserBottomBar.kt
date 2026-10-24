@@ -42,7 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.viewmodel.BrowserViewModel
 
-// Neon Palette for Bottom Bar
+// Neon Glow Colors for 3D Floating Bottom Bar
 val BottomBarBg = Color(0xFF13152C).copy(alpha = 0.95f)
 val NeonActivePurple = Color(0xFFA855F7)
 val NeonActivePink = Color(0xFFEC4899)
@@ -59,6 +59,7 @@ enum class BottomNavItem(val title: String) {
 
 /**
  * 3D Floating Neon Capsule Bottom Bar
+ * Fully compatible with all MainActivity caller signatures
  */
 @Composable
 fun BrowserBottomBar(
@@ -131,7 +132,7 @@ fun BrowserBottomBarLayout(
             .padding(horizontal = 14.dp, vertical = 8.dp),
         contentAlignment = Alignment.Center
     ) {
-        // Floating 3D Capsule Bar
+        // 3D Floating Capsule Surface with Multi-color Neon Border and Glow Shadow
         Surface(
             shape = RoundedCornerShape(28.dp),
             color = BottomBarBg,
@@ -189,7 +190,7 @@ fun BrowserBottomBarLayout(
                     modifier = Modifier.weight(1f)
                 )
 
-                // 4. Tabs
+                // 4. Tabs Badge (Floating Box with Tab Count)
                 BottomBarTabBadgeItem(
                     label = "Tabs ($tabCount)",
                     tabCount = tabCount,
@@ -269,6 +270,7 @@ fun BottomBarTabBadgeItem(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        // Tab Box Icon (Numbered Square)
         Surface(
             shape = RoundedCornerShape(6.dp),
             color = Color.Transparent,
